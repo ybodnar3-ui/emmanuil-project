@@ -31,6 +31,8 @@ export async function sendMagicLink(
     email,
     options: {
       emailRedirectTo: `${origin}/auth/confirm`,
+      // Allow first-time visitors to create an account via the magic link.
+      // Set to false for an invite-only deployment (links only sign in existing users).
       shouldCreateUser: true,
     },
   });

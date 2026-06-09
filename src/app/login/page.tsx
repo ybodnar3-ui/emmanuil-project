@@ -15,7 +15,7 @@ export default function LoginPage() {
   );
 
   return (
-    <section className="flex min-h-dvh flex-col justify-center">
+    <section className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
       <h1 className="text-2xl font-semibold">{t("signIn")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("signInHint")}</p>
 

@@ -31,6 +31,9 @@ export async function getCurrentUser(): Promise<User | null> {
     (user.user_metadata?.locale as string | undefined) ?? null,
   );
 
+  // `update` intentionally omits `locale`: the DB `locale` is a one-time default
+  // set at row creation. Runtime locale switching is cookie-based (see src/i18n),
+  // so we don't overwrite the stored value from Supabase metadata on every login.
   return prisma.user.upsert({
     where: { id: user.id },
     update: { email },
