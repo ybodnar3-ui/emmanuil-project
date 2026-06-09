@@ -11,7 +11,12 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  // Sanitize `next`: only accept a same-origin relative path so a crafted
+  // `?next=https://evil.com` (or protocol-relative `//evil.com`) can't redirect
+  // off-site after a successful auth.
+  const rawNext = searchParams.get("next") ?? "/";
+  const next =
+    rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
 
   if (tokenHash && type) {
     const supabase = await createSupabaseServerClient();

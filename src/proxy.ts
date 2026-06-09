@@ -1,7 +1,11 @@
 import type { NextRequest } from "next/server";
 import { updateSession } from "@/server/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+// Next 16 renamed the root `middleware` file convention to `proxy`. The file must
+// live at `src/proxy.ts` and export a `proxy` function (named or default). We keep
+// delegating to the existing @supabase/ssr `updateSession` helper (that filename is
+// unaffected by the rename).
+export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
 

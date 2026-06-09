@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { createClient } from "@supabase/supabase-js";
 import { afterAll, describe, expect, it } from "vitest";
 
@@ -24,8 +25,10 @@ const TEST_PERSON_ID = "rls-test-person";
 describe.skipIf(!hasEnv)("RLS deny-by-default (anon path)", () => {
   afterAll(async () => {
     // Always clean up, even if assertions failed. Deleting the User cascades to Person.
+    // Do NOT $disconnect() here: `prisma` is the shared module singleton, so
+    // disconnecting would break any later test that uses the real client. Vitest's
+    // process teardown closes the pool when the run ends.
     await prisma.user.deleteMany({ where: { id: TEST_USER_ID } });
-    await prisma.$disconnect();
   });
 
   it("hides a Prisma-seeded Person row from the anon Supabase client", async () => {
@@ -43,7 +46,13 @@ describe.skipIf(!hasEnv)("RLS deny-by-default (anon path)", () => {
     expect(seeded?.id).toBe(TEST_PERSON_ID);
 
     // The real proof: the anon client must NOT see the row that definitely exists.
-    const supabase = createClient(url!, anonKey!);
+    // This test only uses the PostgREST (HTTP) path. Under the node test env on
+    // Node 20 there is no global WebSocket, and supabase-js eagerly initializes its
+    // realtime client in the constructor, which would throw. We never open a realtime
+    // channel, so we inject a dummy transport to skip the global-WebSocket lookup.
+    const supabase = createClient(url!, anonKey!, {
+      realtime: { transport: class {} as never },
+    });
     const { data, error } = await supabase
       .from("Person")
       .select("*")
