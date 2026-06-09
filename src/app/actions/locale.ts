@@ -7,6 +7,11 @@ import { LOCALE_COOKIE, normalizeLocale } from "@/i18n/locale";
 export async function setLocale(value: string) {
   const locale = normalizeLocale(value);
   const store = await cookies();
-  store.set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365 });
-  revalidatePath("/");
+  store.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    sameSite: "lax",
+  });
+  revalidatePath("/", "layout");
 }

@@ -7,5 +7,7 @@ export default defineConfig({
   schema: "./prisma/schema.prisma",
   datasource: {
     url: process.env.DATABASE_URL,
+    // Note: Prisma 7's Datasource type does not expose directUrl; use DATABASE_URL
+    // for a direct/unpooled connection URL (e.g. set DATABASE_URL to the direct URL for migrations).
   },
 });

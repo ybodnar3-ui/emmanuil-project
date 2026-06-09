@@ -2,6 +2,8 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// In Prisma 7, `url` and `directUrl` are no longer allowed in schema.prisma.
+// Connection config (url, directUrl) is set in prisma.config.ts instead.
 datasource db {
   provider = "postgresql"
 }
