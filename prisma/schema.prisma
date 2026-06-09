@@ -2,10 +2,102 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// In Prisma 7, `url` and `directUrl` are no longer allowed in schema.prisma.
-// Connection config (url, directUrl) is set in prisma.config.ts instead.
+// Prisma 7: connection url is configured in prisma.config.ts (CLI) and via the
+// @prisma/adapter-pg driver adapter at runtime (see src/server/db.ts).
 datasource db {
   provider = "postgresql"
 }
 
-// Models are added in Phase 2 (Auth + data layer) once Supabase is connected.
+model User {
+  id           String        @id // equals Supabase auth UID
+  email        String        @unique
+  name         String?
+  locale       String        @default("en")
+  createdAt    DateTime      @default(now())
+  people       Person[]
+  tasks        Task[]
+  chatMessages ChatMessage[]
+}
+
+model Person {
+  id               String        @id @default(cuid())
+  userId           String
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName         String
+  photoUrl         String?
+  howWeMet         String?
+  location         String?
+  birthday         DateTime?
+  tags             String[]
+  relationshipTier String? // "vip" | "friend" | "acquaintance"
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  facts            Fact[]
+  interactions     Interaction[]
+  cadence          Cadence?
+  tasks            Task[]
+  chatMessages     ChatMessage[]
+
+  @@index([userId])
+}
+
+model Fact {
+  id        String   @id @default(cuid())
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  category  String // "family" | "work" | "projects" | "interests" | "ask-about"
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([personId])
+}
+
+model Interaction {
+  id        String   @id @default(cuid())
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  date      DateTime @default(now())
+  channel   String? // "call" | "meeting" | "message"
+  summary   String
+  createdAt DateTime @default(now())
+
+  @@index([personId])
+}
+
+model Cadence {
+  id              String    @id @default(cuid())
+  personId        String    @unique
+  person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  intervalDays    Int
+  lastContactedAt DateTime?
+  nextDueAt       DateTime
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  personId  String?
+  person    Person?  @relation(fields: [personId], references: [id], onDelete: SetNull)
+  title     String
+  dueAt     DateTime
+  status    String   @default("todo") // "todo" | "done"
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([dueAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  personId  String?
+  person    Person?  @relation(fields: [personId], references: [id], onDelete: SetNull)
+  role      String // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
