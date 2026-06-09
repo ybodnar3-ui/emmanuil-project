@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T12:54:34.292Z",
+  "timestamp": "2026-06-09T12:56:41.940Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -18,57 +18,33 @@
   "uncommitted_files": [
     {
       "status": "M",
-      "path": ".gitignore"
-    },
-    {
-      "status": "M",
       "path": ".planning/HANDOFF.json"
     },
     {
       "status": "M",
-      "path": "README.md"
-    },
-    {
-      "status": "??",
-      "path": "AGENTS.md"
-    },
-    {
-      "status": "??",
-      "path": "CLAUDE.md"
-    },
-    {
-      "status": "??",
-      "path": "eslint.config.mjs"
-    },
-    {
-      "status": "??",
       "path": "next.config.ts"
     },
     {
-      "status": "??",
+      "status": "M",
       "path": "package.json"
     },
     {
-      "status": "??",
+      "status": "M",
       "path": "pnpm-lock.yaml"
     },
     {
       "status": "??",
-      "path": "postcss.config.mjs"
+      "path": "messages/"
     },
     {
       "status": "??",
-      "path": "public/"
+      "path": "src/app/actions/"
     },
     {
       "status": "??",
-      "path": "src/"
-    },
-    {
-      "status": "??",
-      "path": "tsconfig.json"
+      "path": "src/i18n/"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant\n252dfec Initial commit"
+  "context_notes": "Recent commits:\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant"
 }

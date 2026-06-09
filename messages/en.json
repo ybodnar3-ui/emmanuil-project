@@ -1,0 +1,7 @@
+{
+  "nav": { "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
+  "today": { "title": "Today", "empty": "Nothing for today yet." },
+  "people": { "title": "People", "empty": "No people yet." },
+  "assistant": { "title": "Assistant", "placeholder": "Ask about someone, or add a fact…" },
+  "settings": { "title": "Settings", "language": "Language" }
+}
