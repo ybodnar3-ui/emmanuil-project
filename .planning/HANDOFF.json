@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T12:39:46.953Z",
+  "timestamp": "2026-06-09T12:47:50.069Z",
   "source": "auto-postool",
-  "partial": true,
+  "partial": false,
   "phase": null,
   "phase_name": null,
   "phase_dir": null,
@@ -15,7 +15,16 @@
   "blockers": [],
   "human_actions_pending": [],
   "decisions": [],
-  "uncommitted_files": [],
+  "uncommitted_files": [
+    {
+      "status": "M",
+      "path": ".planning/HANDOFF.json"
+    },
+    {
+      "status": "??",
+      "path": "docs/superpowers/plans/"
+    }
+  ],
   "next_action": null,
-  "context_notes": ""
+  "context_notes": "Recent commits:\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant\n252dfec Initial commit"
 }
