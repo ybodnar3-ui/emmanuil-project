@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T12:56:41.940Z",
+  "timestamp": "2026-06-09T12:58:21.090Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -18,14 +18,6 @@
   "uncommitted_files": [
     {
       "status": "M",
-      "path": ".planning/HANDOFF.json"
-    },
-    {
-      "status": "M",
-      "path": "next.config.ts"
-    },
-    {
-      "status": "M",
       "path": "package.json"
     },
     {
@@ -33,18 +25,22 @@
       "path": "pnpm-lock.yaml"
     },
     {
-      "status": "??",
-      "path": "messages/"
+      "status": "M",
+      "path": "src/app/globals.css"
+    },
+    {
+      "status": "M",
+      "path": "src/lib/utils.ts"
     },
     {
       "status": "??",
-      "path": "src/app/actions/"
+      "path": "components.json"
     },
     {
       "status": "??",
-      "path": "src/i18n/"
+      "path": "src/components/"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant"
+  "context_notes": "Recent commits:\n133835e feat: add next-intl with EN default + UK locale (cookie-based)\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project"
 }
