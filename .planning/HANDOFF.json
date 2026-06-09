@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T12:59:23.275Z",
+  "timestamp": "2026-06-09T13:24:54.209Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -18,37 +18,25 @@
   "uncommitted_files": [
     {
       "status": "M",
-      "path": "src/app/layout.tsx"
+      "path": ".planning/HANDOFF.json"
     },
     {
       "status": "M",
-      "path": "src/app/page.tsx"
+      "path": "package.json"
+    },
+    {
+      "status": "M",
+      "path": "pnpm-lock.yaml"
     },
     {
       "status": "??",
-      "path": "src/app/assistant/"
+      "path": "prisma.config.ts"
     },
     {
       "status": "??",
-      "path": "src/app/people/"
-    },
-    {
-      "status": "??",
-      "path": "src/app/settings/"
-    },
-    {
-      "status": "??",
-      "path": "src/components/__tests__/"
-    },
-    {
-      "status": "??",
-      "path": "src/components/bottom-nav.tsx"
-    },
-    {
-      "status": "??",
-      "path": "src/components/locale-switcher.tsx"
+      "path": "prisma/"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\ne7d11a7 chore: initialize shadcn/ui with button primitive\n133835e feat: add next-intl with EN default + UK locale (cookie-based)\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan"
+  "context_notes": "Recent commits:\na36a5ad feat: app shell with bottom nav, four tabs, and locale switcher\ne7d11a7 chore: initialize shadcn/ui with button primitive\n133835e feat: add next-intl with EN default + UK locale (cookie-based)\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)"
 }
