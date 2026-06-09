@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 
-export default function TodayPage() {
-  const t = useTranslations("today");
+export default function PeoplePage() {
+  const t = useTranslations("people");
   return (
     <section>
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
