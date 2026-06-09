@@ -3,5 +3,13 @@
   "today": { "title": "Today", "empty": "Nothing for today yet." },
   "people": { "title": "People", "empty": "No people yet." },
   "assistant": { "title": "Assistant", "placeholder": "Ask about someone, or add a fact…" },
-  "settings": { "title": "Settings", "language": "Language" }
+  "settings": { "title": "Settings", "language": "Language", "signOut": "Sign out" },
+  "auth": {
+    "signIn": "Sign in",
+    "signInHint": "We'll email you a magic link to sign in. No password needed.",
+    "emailLabel": "Email",
+    "sendLink": "Send magic link",
+    "linkSent": "Check your email for a sign-in link.",
+    "error": "Something went wrong. Please try again."
+  }
 }
