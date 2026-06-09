@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T12:47:50.069Z",
+  "timestamp": "2026-06-09T12:54:34.292Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -18,13 +18,57 @@
   "uncommitted_files": [
     {
       "status": "M",
+      "path": ".gitignore"
+    },
+    {
+      "status": "M",
       "path": ".planning/HANDOFF.json"
     },
     {
+      "status": "M",
+      "path": "README.md"
+    },
+    {
       "status": "??",
-      "path": "docs/superpowers/plans/"
+      "path": "AGENTS.md"
+    },
+    {
+      "status": "??",
+      "path": "CLAUDE.md"
+    },
+    {
+      "status": "??",
+      "path": "eslint.config.mjs"
+    },
+    {
+      "status": "??",
+      "path": "next.config.ts"
+    },
+    {
+      "status": "??",
+      "path": "package.json"
+    },
+    {
+      "status": "??",
+      "path": "pnpm-lock.yaml"
+    },
+    {
+      "status": "??",
+      "path": "postcss.config.mjs"
+    },
+    {
+      "status": "??",
+      "path": "public/"
+    },
+    {
+      "status": "??",
+      "path": "src/"
+    },
+    {
+      "status": "??",
+      "path": "tsconfig.json"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant\n252dfec Initial commit"
+  "context_notes": "Recent commits:\ncb27d85 docs: add implementation roadmap and Phase 1 (scaffold) plan\n565a957 Merge branch 'main' of https://github.com/ybodnar3-ui/emmanuil-project\nc0cf69f Add design spec for Personal Relationship CRM + AI assistant\n252dfec Initial commit"
 }
