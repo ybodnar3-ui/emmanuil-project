@@ -27,4 +27,13 @@ describe("BottomNav", () => {
     );
     expect(screen.getByText("Today").closest("a")).toHaveAttribute("aria-current", "page");
   });
+
+  it("does not mark inactive tabs with aria-current", () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <BottomNav />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText("People").closest("a")).not.toHaveAttribute("aria-current");
+  });
 });

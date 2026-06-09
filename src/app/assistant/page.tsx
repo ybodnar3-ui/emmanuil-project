@@ -1,7 +1,7 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export default function AssistantPage() {
-  const t = useTranslations("assistant");
+export default async function AssistantPage() {
+  const t = await getTranslations("assistant");
   return (
     <section>
       <h1 className="text-2xl font-semibold">{t("title")}</h1>

@@ -1,7 +1,7 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export default function TodayPage() {
-  const t = useTranslations("today");
+export default async function TodayPage() {
+  const t = await getTranslations("today");
   return (
     <section>
       <h1 className="text-2xl font-semibold">{t("title")}</h1>
