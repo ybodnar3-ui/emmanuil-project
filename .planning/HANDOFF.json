@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-12T15:40:13.908Z",
+  "timestamp": "2026-06-12T15:42:17.565Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -21,14 +21,50 @@
       "path": ".planning/HANDOFF.json"
     },
     {
-      "status": "??",
-      "path": "src/app/(app)/people/actions.ts"
+      "status": "M",
+      "path": "messages/en.json"
+    },
+    {
+      "status": "M",
+      "path": "messages/uk.json"
+    },
+    {
+      "status": "M",
+      "path": "src/app/(app)/people/page.tsx"
     },
     {
       "status": "??",
-      "path": "src/server/storage.ts"
+      "path": "src/app/(app)/people/_components/"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/avatar.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/badge.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/card.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/input.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/label.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/select.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/components/ui/textarea.tsx"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping\n9bc68d7 feat: cadence math + zod validation schemas\nb7ee843 docs: add Phase 3 (people + person card) implementation plan\n29d31c9 chore: login layout padding and clarifying comments"
+  "context_notes": "Recent commits:\nd040804 feat: people server actions with zod validation\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping\n9bc68d7 feat: cadence math + zod validation schemas\nb7ee843 docs: add Phase 3 (people + person card) implementation plan"
 }

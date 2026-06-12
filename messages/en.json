@@ -1,7 +1,88 @@
 {
   "nav": { "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
   "today": { "title": "Today", "empty": "Nothing for today yet." },
-  "people": { "title": "People", "empty": "No people yet." },
+  "people": {
+    "title": "People",
+    "empty": "No people yet.",
+    "add": "Add person",
+    "searchPlaceholder": "Search by name…",
+    "filterTier": "Relationship",
+    "tier": {
+      "all": "All",
+      "vip": "VIP",
+      "friend": "Friend",
+      "acquaintance": "Acquaintance"
+    },
+    "form": {
+      "newTitle": "New person",
+      "editTitle": "Edit person",
+      "fullName": "Full name",
+      "howWeMet": "How we met",
+      "location": "Location",
+      "birthday": "Birthday",
+      "tags": "Tags",
+      "tagsHint": "Comma-separated",
+      "relationshipTier": "Relationship",
+      "tierNone": "None",
+      "photo": "Photo",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel"
+    },
+    "card": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this person and all their facts, interactions and cadence?",
+      "noLocation": "No location",
+      "birthday": "Birthday",
+      "aiBrief": "What do I know?",
+      "aiBriefSoon": "Coming soon"
+    },
+    "facts": {
+      "title": "Facts",
+      "empty": "No facts yet.",
+      "add": "Add fact",
+      "content": "Fact",
+      "category": "Category",
+      "delete": "Delete fact"
+    },
+    "factCategory": {
+      "family": "Family",
+      "work": "Work",
+      "projects": "Projects",
+      "interests": "Interests",
+      "ask-about": "Ask about"
+    },
+    "interactions": {
+      "title": "Interactions",
+      "empty": "No interactions logged yet.",
+      "log": "Log interaction",
+      "summary": "What happened",
+      "date": "Date",
+      "channel": "Channel"
+    },
+    "channel": {
+      "none": "—",
+      "call": "Call",
+      "meeting": "Meeting",
+      "message": "Message"
+    },
+    "cadence": {
+      "title": "Stay in touch",
+      "none": "No reminder set.",
+      "everyDays": "Every {days} days",
+      "nextDue": "Next due {date}",
+      "lastContacted": "Last contacted {date}",
+      "set": "Set reminder",
+      "update": "Update reminder",
+      "clear": "Clear",
+      "interval": "Remind me every (days)"
+    },
+    "errors": {
+      "invalid": "Please check this field.",
+      "photo": "Photo upload failed, but the rest was saved."
+    }
+  },
   "assistant": { "title": "Assistant", "placeholder": "Ask about someone, or add a fact…" },
   "settings": { "title": "Settings", "language": "Language", "signOut": "Sign out" },
   "auth": {
