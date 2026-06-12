@@ -104,7 +104,13 @@ export async function createPersonAction(
   // redirects to the card — never back to the empty /new form (which would let a
   // resubmit create a duplicate). A failed photo upload is surfaced non-fatally
   // via ?photoError=1 rather than blocking the save.
-  const person = await createPerson(user.id, parsed.data);
+  let person: Awaited<ReturnType<typeof createPerson>>;
+  try {
+    person = await createPerson(user.id, parsed.data);
+  } catch (err) {
+    logError("action.createPerson", err, { userId: user.id });
+    return { status: "error", message: "people.errors.saveFailed" };
+  }
 
   const { photoUrl, photoError } = await maybeUploadPhoto(
     user.id,
@@ -129,7 +135,12 @@ export async function updatePersonAction(
 
   // Save the edits first, then upload. A failed photo upload never blocks the
   // save: we redirect to the card with ?photoError=1 for a non-fatal notice.
-  await updatePerson(user.id, personId, parsed.data);
+  try {
+    await updatePerson(user.id, personId, parsed.data);
+  } catch (err) {
+    logError("action.updatePerson", err, { userId: user.id, personId });
+    return { status: "error", message: "people.errors.saveFailed" };
+  }
 
   const { photoUrl, photoError } = await maybeUploadPhoto(
     user.id,
@@ -146,7 +157,13 @@ export async function deletePersonAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   const personId = String(formData.get("personId") ?? "");
   if (personId) {
-    await deletePerson(user.id, personId);
+    try {
+      await deletePerson(user.id, personId);
+    } catch (err) {
+      // Idempotent: a stale/already-deleted id is treated as success. Log it,
+      // then fall through to the same revalidate + redirect.
+      logError("action.deletePerson", err, { userId: user.id, personId });
+    }
   }
   revalidatePath("/people");
   redirect("/people");
@@ -165,7 +182,12 @@ export async function addFactAction(
   if (!parsed.success) {
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
-  await addFact(user.id, personId, parsed.data);
+  try {
+    await addFact(user.id, personId, parsed.data);
+  } catch (err) {
+    logError("action.addFact", err, { userId: user.id, personId });
+    return { status: "error", message: "people.errors.notFound" };
+  }
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
 }
@@ -192,7 +214,12 @@ export async function logInteractionAction(
   if (!parsed.success) {
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
-  await logInteraction(user.id, personId, parsed.data);
+  try {
+    await logInteraction(user.id, personId, parsed.data);
+  } catch (err) {
+    logError("action.logInteraction", err, { userId: user.id, personId });
+    return { status: "error", message: "people.errors.notFound" };
+  }
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
 }
@@ -209,7 +236,12 @@ export async function setCadenceAction(
   if (!parsed.success) {
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
-  await setCadence(user.id, personId, parsed.data.intervalDays);
+  try {
+    await setCadence(user.id, personId, parsed.data.intervalDays);
+  } catch (err) {
+    logError("action.setCadence", err, { userId: user.id, personId });
+    return { status: "error", message: "people.errors.notFound" };
+  }
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
 }
@@ -235,7 +267,12 @@ export async function clearCadenceAction(formData: FormData): Promise<void> {
   const user = await requireUser();
   const personId = String(formData.get("personId") ?? "");
   if (personId) {
-    await clearCadence(user.id, personId);
+    try {
+      await clearCadence(user.id, personId);
+    } catch (err) {
+      // Idempotent: clearing a cadence that's already gone is a no-op success.
+      logError("action.clearCadence", err, { userId: user.id, personId });
+    }
     revalidatePath(`/people/${personId}`);
   }
 }

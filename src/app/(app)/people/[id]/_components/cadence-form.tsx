@@ -22,8 +22,10 @@ export function CadenceForm({
   currentIntervalDays?: number;
 }) {
   const t = useTranslations("people");
+  const tRoot = useTranslations();
   const action = setCadenceAction.bind(null, personId);
-  const [, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
+  const message = state.status === "error" ? state.message : undefined;
 
   return (
     <div className="space-y-2">
@@ -50,6 +52,12 @@ export function CadenceForm({
           {currentIntervalDays ? t("cadence.update") : t("cadence.set")}
         </Button>
       </form>
+
+      {message ? (
+        <p role="alert" className="text-sm text-destructive">
+          {tRoot(message)}
+        </p>
+      ) : null}
 
       {currentIntervalDays ? (
         <form action={clearCadenceAction}>

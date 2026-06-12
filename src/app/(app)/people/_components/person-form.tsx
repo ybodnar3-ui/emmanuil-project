@@ -43,8 +43,12 @@ export function PersonForm({
   cancelHref: string;
 }) {
   const t = useTranslations("people");
+  // Top-level action messages are returned as full dotted keys (e.g.
+  // "people.errors.saveFailed"), so resolve them with a root-scoped translator.
+  const tRoot = useTranslations();
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
+  const message = state.status === "error" ? state.message : undefined;
 
   function errorFor(field: string) {
     const key = fieldErrors?.[field];
@@ -53,6 +57,11 @@ export function PersonForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      {message ? (
+        <p role="alert" className="text-sm text-destructive">
+          {tRoot(message)}
+        </p>
+      ) : null}
       <div className="space-y-1.5">
         <Label htmlFor="fullName">{t("form.fullName")}</Label>
         <Input

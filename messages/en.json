@@ -126,7 +126,9 @@
     "errors": {
       "invalid": "Please check this field.",
       "photo": "Photo upload failed, but the rest was saved.",
-      "photoUpload": "Photo upload failed, but the rest was saved."
+      "photoUpload": "Photo upload failed, but the rest was saved.",
+      "saveFailed": "Could not save. Please try again.",
+      "notFound": "That person is no longer available. Refresh and try again."
     }
   },
   "assistant": {

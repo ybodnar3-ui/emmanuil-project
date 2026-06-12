@@ -19,9 +19,11 @@ export function FactForm({
   defaultCategory: (typeof FACT_CATEGORIES)[number];
 }) {
   const t = useTranslations("people");
+  const tRoot = useTranslations();
   const action = addFactAction.bind(null, personId);
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const message = state.status === "error" ? state.message : undefined;
 
   // Clear the input after a successful add.
   useEffect(() => {
@@ -29,21 +31,28 @@ export function FactForm({
   }, [state]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex gap-2">
-      <input type="hidden" name="category" value={defaultCategory} />
-      <Label htmlFor={`fact-${defaultCategory}`} className="sr-only">
-        {t("facts.content")}
-      </Label>
-      <Input
-        id={`fact-${defaultCategory}`}
-        name="content"
-        required
-        placeholder={t("facts.add")}
-        className="flex-1"
-      />
-      <Button type="submit" size="sm" variant="outline" disabled={pending}>
-        {t("facts.add")}
-      </Button>
-    </form>
+    <div className="space-y-1.5">
+      <form ref={formRef} action={formAction} className="flex gap-2">
+        <input type="hidden" name="category" value={defaultCategory} />
+        <Label htmlFor={`fact-${defaultCategory}`} className="sr-only">
+          {t("facts.content")}
+        </Label>
+        <Input
+          id={`fact-${defaultCategory}`}
+          name="content"
+          required
+          placeholder={t("facts.add")}
+          className="flex-1"
+        />
+        <Button type="submit" size="sm" variant="outline" disabled={pending}>
+          {t("facts.add")}
+        </Button>
+      </form>
+      {message ? (
+        <p role="alert" className="text-sm text-destructive">
+          {tRoot(message)}
+        </p>
+      ) : null}
+    </div>
   );
 }

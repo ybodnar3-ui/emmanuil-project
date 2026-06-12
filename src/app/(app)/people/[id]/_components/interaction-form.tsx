@@ -14,9 +14,11 @@ const initialState: FormState = { status: "idle" };
 
 export function InteractionForm({ personId }: { personId: string }) {
   const t = useTranslations("people");
+  const tRoot = useTranslations();
   const action = logInteractionAction.bind(null, personId);
   const [state, formAction, pending] = useActionState(action, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const message = state.status === "error" ? state.message : undefined;
 
   useEffect(() => {
     if (state.status === "ok") formRef.current?.reset();
@@ -60,6 +62,11 @@ export function InteractionForm({ personId }: { personId: string }) {
           {t("interactions.log")}
         </Button>
       </div>
+      {message ? (
+        <p role="alert" className="text-sm text-destructive">
+          {tRoot(message)}
+        </p>
+      ) : null}
     </form>
   );
 }
