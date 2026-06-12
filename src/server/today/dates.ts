@@ -8,7 +8,7 @@
  * of UTC, which is why these helpers never touch the local timezone.
  */
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** 00:00:00.000Z of `d`'s UTC calendar date. Does not mutate `d`. */
 export function startOfUtcDay(d: Date): Date {

@@ -1,4 +1,4 @@
-import { startOfUtcDay, daysUntilBirthday } from "./dates";
+import { startOfUtcDay, daysUntilBirthday, MS_PER_DAY } from "./dates";
 
 /**
  * One actionable row in the Today feed. The three sources (cadence-due contacts,
@@ -51,7 +51,6 @@ export type FeedSources = {
 
 /** Whole UTC days `dueAt` is before today's start; 0 if due today (or future). */
 function overdueDays(dueAt: Date, now: Date): number {
-  const MS_PER_DAY = 24 * 60 * 60 * 1000;
   const diff = startOfUtcDay(now).getTime() - startOfUtcDay(dueAt).getTime();
   return diff > 0 ? Math.round(diff / MS_PER_DAY) : 0;
 }
