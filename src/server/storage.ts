@@ -15,6 +15,14 @@ import { randomUUID } from "node:crypto";
 
 const AVATARS_BUCKET = "avatars";
 
+/**
+ * Reject avatars larger than this before reading them into memory. Kept under the
+ * serverActions.bodySizeLimit in next.config.ts so the framework's multipart limit
+ * isn't the first thing a user hits. The thrown error is caught by the action's
+ * maybeUploadPhoto and surfaced as the non-fatal photo notice.
+ */
+export const MAX_AVATAR_BYTES = 5 * 1024 * 1024;
+
 function serviceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -53,6 +61,12 @@ export async function ensureAvatarsBucket(): Promise<void> {
  * Caller is responsible for ensuring ownership of the person it's attached to.
  */
 export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  if (file.size > MAX_AVATAR_BYTES) {
+    throw new Error(
+      `Avatar exceeds the ${MAX_AVATAR_BYTES} byte limit (got ${file.size}).`,
+    );
+  }
+
   const supabase = serviceClient();
 
   const ext = file.name.includes(".")
