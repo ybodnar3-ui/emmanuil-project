@@ -1,5 +1,5 @@
 {
-  "nav": { "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
+  "nav": { "ariaLabel": "Main", "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
   "today": {
     "title": "Today",
     "empty": "Nothing for today yet.",
@@ -161,6 +161,7 @@
     "signIn": "Sign in",
     "signInHint": "We'll email you a magic link to sign in. No password needed.",
     "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
     "sendLink": "Send magic link",
     "linkSent": "Check your email for a sign-in link.",
     "error": "Something went wrong. Please try again."

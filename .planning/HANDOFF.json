@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-12T15:44:26.023Z",
+  "timestamp": "2026-06-12T18:54:56.109Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -17,14 +17,14 @@
   "decisions": [],
   "uncommitted_files": [
     {
-      "status": "??",
-      "path": "src/app/(app)/people/[id]/_components/"
+      "status": "M",
+      "path": ".planning/HANDOFF.json"
     },
     {
       "status": "??",
-      "path": "src/app/(app)/people/[id]/page.tsx"
+      "path": "src/i18n/__tests__/messages-parity.test.ts"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n5bab318 feat: create/edit person form\n52b0593 feat: people list with search and filters\nd040804 feat: people server actions with zod validation\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping"
+  "context_notes": "Recent commits:\nd275130 docs: add Phase 7 (i18n completeness + PWA-readiness) implementation plan\n77d581c refactor: dedupe MS_PER_DAY between dates.ts and feed.ts\nddc0e4f fix: degrade deleted-person/task action throws to stable NOT_FOUND result\n31a991b feat: Today feed UI with Done/Snooze, tasks, and talking points\n74efde6 feat: talking-point AI + Today server actions"
 }

@@ -35,7 +35,7 @@ export default function LoginPage() {
             required
             autoComplete="email"
             inputMode="email"
-            placeholder="you@example.com"
+            placeholder={t("emailPlaceholder")}
             className="rounded-md border border-input bg-background px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
           {state.status === "error" ? (
