@@ -93,7 +93,33 @@
       "photoUpload": "Photo upload failed, but the rest was saved."
     }
   },
-  "assistant": { "title": "Assistant", "placeholder": "Ask about someone, or add a fact…" },
+  "assistant": {
+    "title": "Assistant",
+    "placeholder": "Ask about someone, or add a fact…",
+    "inputPlaceholder": "Ask about someone, or add a fact…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "errors": {
+      "EMPTY_INPUT": "Type a message first.",
+      "REQUEST_FAILED": "Something went wrong reaching the assistant. Please try again.",
+      "PARSE_FAILED": "The assistant couldn't understand the response. Please try again.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "proposal": {
+      "title": "Proposed update",
+      "confirm": "Confirm",
+      "dismiss": "Dismiss",
+      "applied": "Saved.",
+      "viewPerson": "View person"
+    },
+    "clarify": { "createPerson": "Add a new person" },
+    "voice": {
+      "start": "Start voice input",
+      "stop": "Stop voice input",
+      "unsupported": "Voice input isn't supported in this browser.",
+      "listening": "Listening…"
+    }
+  },
   "settings": { "title": "Settings", "language": "Language", "signOut": "Sign out" },
   "auth": {
     "signIn": "Sign in",
