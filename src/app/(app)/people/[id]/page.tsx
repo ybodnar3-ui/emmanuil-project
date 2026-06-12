@@ -14,6 +14,7 @@ import { DeleteFactButton } from "./_components/delete-fact-button";
 import { InteractionForm } from "./_components/interaction-form";
 import { CadenceForm } from "./_components/cadence-form";
 import { DeletePersonButton } from "./_components/delete-person-button";
+import { BriefPanel } from "./_components/brief-panel";
 
 export default async function PersonCardPage({
   params,
@@ -101,11 +102,10 @@ export default async function PersonCardPage({
           {t("card.edit")}
         </Button>
         <DeletePersonButton personId={person.id} />
-        {/* Phase 4 placeholder — AI brief is not built here. */}
-        <Button variant="ghost" size="sm" disabled title={t("card.aiBriefSoon")}>
-          {t("card.aiBrief")}
-        </Button>
       </div>
+
+      {/* AI brief — generated on demand from this person's own data. */}
+      <BriefPanel personId={person.id} />
 
       {person.howWeMet ? (
         <p className="text-sm whitespace-pre-line">{person.howWeMet}</p>

@@ -34,9 +34,18 @@
       "delete": "Delete",
       "deleteConfirm": "Delete this person and all their facts, interactions and cadence?",
       "noLocation": "No location",
-      "birthday": "Birthday",
-      "aiBrief": "What do I know?",
-      "aiBriefSoon": "Coming soon"
+      "birthday": "Birthday"
+    },
+    "brief": {
+      "button": "What do I know?",
+      "loading": "Thinking…",
+      "error": "Could not generate a brief. Please try again.",
+      "retry": "Regenerate",
+      "summary": "Summary",
+      "talkingPoints": "Talking points",
+      "askAbout": "Ask about",
+      "reconnectReason": "Why reconnect now",
+      "empty": "Not enough information yet. Add facts or interactions first."
     },
     "facts": {
       "title": "Facts",

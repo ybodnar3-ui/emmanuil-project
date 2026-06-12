@@ -9,7 +9,10 @@ import {
   updatePerson,
   deletePerson,
   updatePersonPhoto,
+  getPerson,
 } from "@/server/data/people";
+import { generateBrief, type BriefResult } from "@/server/ai/brief";
+import { getLocaleFromCookie } from "@/i18n/locale";
 import { addFact, deleteFact } from "@/server/data/facts";
 import { logInteraction } from "@/server/data/interactions";
 import { setCadence, clearCadence } from "@/server/data/cadence";
@@ -207,6 +210,23 @@ export async function setCadenceAction(
   await setCadence(user.id, personId, parsed.data.intervalDays);
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
+}
+
+/**
+ * Generate the on-demand AI brief for a person. Auth + ownership are enforced:
+ * requireUser() then getPerson(user.id, …) — the brief is built only from a
+ * person the caller owns. Never throws to the client; generateBrief returns a
+ * stable BriefResult error code on failure, which the UI maps to a localized
+ * message. The brief is not persisted in this phase.
+ */
+export async function generateBriefAction(
+  personId: string,
+): Promise<BriefResult> {
+  const user = await requireUser();
+  const person = await getPerson(user.id, personId); // ownership-scoped
+  if (!person) return { status: "error", message: "NOT_FOUND" };
+  const locale = await getLocaleFromCookie();
+  return generateBrief(person, locale);
 }
 
 export async function clearCadenceAction(formData: FormData): Promise<void> {
