@@ -1,5 +1,13 @@
-import { describe, it, expect } from "vitest";
-import { buildBriefContext, type PersonForBrief } from "../brief";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { buildBriefContext, generateBrief, type PersonForBrief } from "../brief";
+
+// Mock the client module so no real network call is made. `parse` is a spy we
+// reconfigure per test; `getAnthropic` returns a stub exposing it.
+const parse = vi.fn();
+vi.mock("../client", () => ({
+  BRIEF_MODEL: "claude-sonnet-4-6",
+  getAnthropic: () => ({ messages: { parse } }),
+}));
 
 function fullPerson(): PersonForBrief {
   return {
@@ -70,5 +78,56 @@ describe("buildBriefContext", () => {
     expect(ctx).toContain("interaction 9");
     expect(ctx).not.toContain("interaction 10");
     expect(ctx).not.toContain("interaction 11");
+  });
+});
+
+describe("generateBrief (mocked client)", () => {
+  beforeEach(() => {
+    parse.mockReset();
+  });
+
+  it("returns ok with the parsed brief and passes the person's facts into the request", async () => {
+    const brief = {
+      summary: "A close friend who leads design.",
+      talkingPoints: ["Her new role"],
+      askAbout: ["How is Sofia?"],
+      reconnectReason: "It has been a month.",
+    };
+    parse.mockResolvedValue({ parsed_output: brief });
+
+    const result = await generateBrief(fullPerson(), "en");
+
+    expect(result).toEqual({ status: "ok", brief });
+
+    // The person's facts must have been included in the model input.
+    expect(parse).toHaveBeenCalledOnce();
+    const args = parse.mock.calls[0]![0];
+    expect(args.model).toBe("claude-sonnet-4-6");
+    const userContent = args.messages[0].content as string;
+    expect(userContent).toContain("Leads design at a fintech startup");
+    expect(userContent).toContain("Respond in locale: en");
+  });
+
+  it("returns an error (no throw) when the model returns no parsed output", async () => {
+    parse.mockResolvedValue({ parsed_output: null });
+
+    const result = await generateBrief(fullPerson(), "en");
+
+    expect(result).toEqual({ status: "error", message: "PARSE_FAILED" });
+  });
+
+  it("resolves to a stable error code when the API throws, without leaking the provider message", async () => {
+    parse.mockRejectedValue(new Error("401 invalid x-api-key sk-ant-secret"));
+
+    const result = await generateBrief(fullPerson(), "en");
+
+    expect(result.status).toBe("error");
+    if (result.status === "error") {
+      expect(result.message).toBe("REQUEST_FAILED");
+      // The raw provider error / any secret must NOT be surfaced.
+      expect(result.message).not.toContain("x-api-key");
+      expect(result.message).not.toContain("sk-ant");
+      expect(result.message).not.toContain("401");
+    }
   });
 });
