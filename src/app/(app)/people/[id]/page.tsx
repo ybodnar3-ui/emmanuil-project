@@ -80,6 +80,7 @@ export default async function PersonCardPage({
         <Button
           variant="outline"
           size="sm"
+          nativeButton={false}
           render={<Link href={`/people/${person.id}/edit`} />}
         >
           <Pencil />

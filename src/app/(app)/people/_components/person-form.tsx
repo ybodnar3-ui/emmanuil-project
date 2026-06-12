@@ -129,7 +129,11 @@ export function PersonForm({
         <Button type="submit" disabled={pending}>
           {pending ? t("form.saving") : t("form.save")}
         </Button>
-        <Button variant="outline" render={<Link href={cancelHref} />}>
+        <Button
+          variant="outline"
+          nativeButton={false}
+          render={<Link href={cancelHref} />}
+        >
           {t("form.cancel")}
         </Button>
       </div>

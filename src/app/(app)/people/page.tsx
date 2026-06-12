@@ -22,7 +22,11 @@ export default async function PeoplePage({
     <section className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <Button render={<Link href="/people/new" />} size="sm">
+        <Button
+          render={<Link href="/people/new" />}
+          nativeButton={false}
+          size="sm"
+        >
           <Plus />
           {t("add")}
         </Button>

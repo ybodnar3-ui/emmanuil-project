@@ -4,13 +4,6 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { RELATIONSHIP_TIERS } from "@/server/validation/person";
 
 const ALL_TIERS = "all";
@@ -66,22 +59,19 @@ export function PeopleSearch() {
         aria-label={t("searchPlaceholder")}
         className="flex-1"
       />
-      <Select
+      <select
         value={tier}
-        onValueChange={(value) => pushParams({ tier: value as string })}
+        onChange={(e) => pushParams({ tier: e.target.value })}
+        aria-label={t("filterTier")}
+        className="h-9 rounded-lg border border-border bg-background px-2.5 text-sm"
       >
-        <SelectTrigger className="w-36" aria-label={t("filterTier")}>
-          <SelectValue placeholder={t("filterTier")} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL_TIERS}>{t("tier.all")}</SelectItem>
-          {RELATIONSHIP_TIERS.map((value) => (
-            <SelectItem key={value} value={value}>
-              {t(`tier.${value}`)}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <option value={ALL_TIERS}>{t("tier.all")}</option>
+        {RELATIONSHIP_TIERS.map((value) => (
+          <option key={value} value={value}>
+            {t(`tier.${value}`)}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
