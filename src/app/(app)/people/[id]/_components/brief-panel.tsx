@@ -65,7 +65,9 @@ export function BriefPanel({ personId }: { personId: string }) {
       ) : null}
 
       {state.status === "ok" ? (
-        <BriefView brief={state.brief} />
+        <div aria-busy={pending} className={pending ? "opacity-50" : undefined}>
+          <BriefView brief={state.brief} />
+        </div>
       ) : null}
     </div>
   );
@@ -89,7 +91,12 @@ function BriefView({ brief }: { brief: Brief }) {
         <p className="text-muted-foreground">{t("empty")}</p>
       ) : null}
 
-      {brief.summary ? <p>{brief.summary}</p> : null}
+      {brief.summary ? (
+        <div className="space-y-1">
+          <h3 className="font-medium">{t("summary")}</h3>
+          <p>{brief.summary}</p>
+        </div>
+      ) : null}
 
       {brief.talkingPoints.length > 0 ? (
         <div className="space-y-1">
