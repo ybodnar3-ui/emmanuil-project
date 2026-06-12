@@ -81,7 +81,14 @@ export async function completeTaskAction(
   taskId: string,
 ): Promise<ActionResult> {
   const user = await requireUser();
-  await completeTask(user.id, taskId);
+  try {
+    // The underlying updateMany is no-op-safe, but wrapping aligns the contract
+    // with the other actions and adds logging if the call itself fails.
+    await completeTask(user.id, taskId);
+  } catch (err) {
+    logError("action.completeTask", err, { userId: user.id, taskId });
+    return { status: "error" as const, message: "NOT_FOUND" };
+  }
   revalidatePath("/");
   return { status: "ok" };
 }
@@ -91,7 +98,12 @@ export async function snoozeTaskAction(
   days: number,
 ): Promise<ActionResult> {
   const user = await requireUser();
-  await snoozeTask(user.id, taskId, days, new Date());
+  try {
+    await snoozeTask(user.id, taskId, days, new Date());
+  } catch (err) {
+    logError("action.snoozeTask", err, { userId: user.id, taskId });
+    return { status: "error" as const, message: "NOT_FOUND" };
+  }
   revalidatePath("/");
   return { status: "ok" };
 }
