@@ -24,7 +24,7 @@ interface SpeechRecognitionLike {
   stop(): void;
   abort(): void;
   onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
   onend: (() => void) | null;
 }
 type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
@@ -54,6 +54,7 @@ const isSupportedServer = () => false;
 export type UseSpeechRecognition = {
   supported: boolean;
   listening: boolean;
+  permissionDenied: boolean;
   start: () => void;
   stop: () => void;
 };
@@ -74,6 +75,7 @@ export function useSpeechRecognition(
     isSupportedServer,
   );
   const [listening, setListening] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   // Keep the latest callback without re-creating start().
@@ -110,12 +112,20 @@ export function useSpeechRecognition(
       }
       onTranscriptRef.current(text);
     };
-    recognition.onerror = () => setListening(false);
+    // Distinguish a denied mic permission from a normal no-speech timeout so the
+    // UI can surface actionable feedback instead of silently going idle.
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        setPermissionDenied(true);
+      }
+      setListening(false);
+    };
     recognition.onend = () => setListening(false);
     recognitionRef.current = recognition;
+    setPermissionDenied(false);
     setListening(true);
     recognition.start();
   }, [locale]);
 
-  return { supported, listening, start, stop };
+  return { supported, listening, permissionDenied, start, stop };
 }

@@ -117,7 +117,8 @@
       "start": "Start voice input",
       "stop": "Stop voice input",
       "unsupported": "Voice input isn't supported in this browser.",
-      "listening": "Listening…"
+      "listening": "Listening…",
+      "denied": "Microphone access was denied. Allow it in your browser settings to use voice input."
     }
   },
   "settings": { "title": "Settings", "language": "Language", "signOut": "Sign out" },
