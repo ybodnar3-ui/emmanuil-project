@@ -16,10 +16,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// theme-color matches the white app chrome (--background = #ffffff); viewport-fit
-// cover lets the layout's safe-area insets reach the notch/home-indicator edges.
+// theme-color matches the app chrome per color scheme (light --background #ffffff,
+// dark --background oklch(0.145 0 0) = #0a0a0a); viewport-fit cover lets the layout's
+// safe-area insets reach the notch/home-indicator edges.
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: [
+    { color: "#ffffff", media: "(prefers-color-scheme: light)" },
+    { color: "#0a0a0a", media: "(prefers-color-scheme: dark)" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

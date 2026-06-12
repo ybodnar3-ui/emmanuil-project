@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Emmanuil",
     short_name: "Emmanuil",
+    // Next.js manifest() is synchronous — locale-aware strings (getTranslations) aren't available here; English only.
     description: "Your relationship portfolio + AI assistant",
     start_url: "/",
     display: "standalone",
