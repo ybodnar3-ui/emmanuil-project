@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { requireUser } from "@/server/auth";
+import { fieldErrorsFromZod } from "./field-errors";
 import {
   createPerson,
   updatePerson,
@@ -39,18 +39,6 @@ export type FormState =
       message?: string;
       fieldErrors?: Record<string, string>;
     };
-
-/** Map a ZodError into our flat fieldErrors shape (first issue per field). */
-function fieldErrorsFromZod(error: z.ZodError): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = issue.path[0];
-    if (typeof key === "string" && !(key in out)) {
-      out[key] = "people.errors.invalid";
-    }
-  }
-  return out;
-}
 
 /** Parse the comma-separated tags input into a trimmed, de-duped string[]. */
 function parseTags(raw: FormDataEntryValue | null): string[] {

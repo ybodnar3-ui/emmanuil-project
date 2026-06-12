@@ -36,11 +36,13 @@ export function AddTaskForm({
 
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   function errorFor(field: string) {
-    const key = fieldErrors?.[field];
-    if (!key) return null;
-    // Data-layer NOT_FOUND (e.g. person deleted before submit) vs. zod "invalid".
-    const message = key === "NOT_FOUND" ? t("errors.notFound") : t("errors.invalid");
-    return <p className="text-sm text-destructive">{message}</p>;
+    const value = fieldErrors?.[field];
+    if (!value) return null;
+    // Zod errors arrive as bare, `tasks`-relative keys (e.g. "errors.invalid")
+    // resolved directly by the scoped translator. The data-layer NOT_FOUND
+    // sentinel (person deleted before submit) maps to its tasks error key.
+    const key = value === "NOT_FOUND" ? "errors.notFound" : value;
+    return <p className="text-sm text-destructive">{t(key)}</p>;
   }
 
   return (

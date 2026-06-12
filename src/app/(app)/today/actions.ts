@@ -32,13 +32,18 @@ export type CreateTaskState =
   | { status: "ok" }
   | { status: "error"; fieldErrors?: Record<string, string>; message?: string };
 
-/** Map a ZodError into the flat fieldErrors shape the form renders inline. */
+/**
+ * Map a ZodError into the flat fieldErrors shape the form renders inline. Values
+ * are BARE, `tasks`-namespace-relative keys (e.g. "errors.invalid") so the form's
+ * useTranslations("tasks") translator resolves them to "tasks.errors.invalid"
+ * without double-prefixing. Mirrors the people action's contract.
+ */
 function fieldErrorsFromZod(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};
   for (const issue of error.issues) {
     const key = issue.path[0];
     if (typeof key === "string" && !(key in out)) {
-      out[key] = "tasks.errors.invalid";
+      out[key] = "errors.invalid";
     }
   }
   return out;

@@ -73,6 +73,8 @@ import {
   deletePersonAction,
   clearCadenceAction,
 } from "../actions";
+import { fieldErrorsFromZod } from "../field-errors";
+import { z } from "zod";
 
 function form(fields: Record<string, string>): FormData {
   const fd = new FormData();
@@ -98,6 +100,42 @@ beforeEach(() => {
   requireUser.mockResolvedValue({ id: "u1" });
   redirect.mockImplementation(() => {
     throw new RedirectError("REDIRECT");
+  });
+});
+
+describe("fieldErrorsFromZod (bare-key contract)", () => {
+  // The People forms render field errors with useTranslations("people"), so the
+  // stored values MUST be bare, namespace-relative keys (e.g. "errors.invalid").
+  // A full path like "people.errors.invalid" would be re-prefixed by the scoped
+  // translator to "people.people.errors.invalid" and leak the raw key string to
+  // the user. This locks the contract so that regression can't silently return.
+  function zodErrorFor(fields: string[]): z.ZodError {
+    const shape: Record<string, z.ZodTypeAny> = {};
+    for (const f of fields) shape[f] = z.string().min(1);
+    const result = z.object(shape).safeParse({});
+    if (result.success) throw new Error("expected parse to fail");
+    return result.error;
+  }
+
+  it("stores bare, people-relative keys (not full paths)", () => {
+    const out = fieldErrorsFromZod(zodErrorFor(["fullName", "intervalDays"]));
+    for (const value of Object.values(out)) {
+      expect(value).toMatch(/^errors\./);
+      expect(value).not.toMatch(/^people\./);
+    }
+    expect(out.fullName).toBe("errors.invalid");
+  });
+
+  it("surfaces a bare field-error key from a real action on empty input", async () => {
+    const result = await createPersonAction(
+      { status: "idle" },
+      form({ fullName: "" }),
+    );
+    expect(result.status).toBe("error");
+    if (result.status !== "error") return;
+    expect(result.fieldErrors?.fullName).toBe("errors.invalid");
+    // createPerson must NOT run when validation fails.
+    expect(createPerson).not.toHaveBeenCalled();
   });
 });
 
