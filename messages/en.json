@@ -1,6 +1,37 @@
 {
   "nav": { "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
-  "today": { "title": "Today", "empty": "Nothing for today yet." },
+  "today": {
+    "title": "Today",
+    "empty": "Nothing for today yet.",
+    "section": {
+      "contacts": "People to reach out to",
+      "birthdays": "Upcoming birthdays",
+      "tasks": "Tasks"
+    },
+    "overdue": "{days, plural, one {# day overdue} other {# days overdue}}",
+    "dueToday": "Due today",
+    "birthdayInDays": "{days, plural, one {Birthday in # day} other {Birthday in # days}}",
+    "birthdayToday": "Birthday today",
+    "done": "Done",
+    "snooze": "Snooze",
+    "snooze3d": "Snooze 3d",
+    "snooze7d": "Snooze 7d",
+    "viewPerson": "View",
+    "talkingPoint": {
+      "button": "What to say?",
+      "loading": "Thinking…",
+      "error": "Could not get a suggestion. Please try again."
+    }
+  },
+  "tasks": {
+    "add": "Add task",
+    "titleLabel": "Task",
+    "dueLabel": "Due date",
+    "personLabel": "Person",
+    "noteLabel": "Note",
+    "none": "None",
+    "errors": { "invalid": "Please check this field." }
+  },
   "people": {
     "title": "People",
     "empty": "No people yet.",
