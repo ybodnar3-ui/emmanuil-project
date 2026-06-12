@@ -159,7 +159,22 @@
       "denied": "Microphone access was denied. Allow it in your browser settings to use voice input."
     }
   },
-  "settings": { "title": "Settings", "language": "Language", "signOut": "Sign out" },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "signOut": "Sign out",
+    "telegram": {
+      "title": "Telegram reminders",
+      "connected": "Telegram is connected. You'll get your daily reminders there.",
+      "notConnected": "Connect Telegram to get a daily reminder of who to reach out to.",
+      "connect": "Connect Telegram",
+      "disconnect": "Disconnect",
+      "instructions": "Open the link below and tap Start to finish connecting.",
+      "openBot": "Open Telegram",
+      "notConfigured": "Telegram isn't set up on this server yet. Please try again later.",
+      "error": "Couldn't connect Telegram. Please try again."
+    }
+  },
   "auth": {
     "signIn": "Sign in",
     "signInHint": "We'll email you a magic link to sign in. No password needed.",
@@ -176,5 +191,12 @@
     "retry": "Try again",
     "backToPeople": "Back to People",
     "notFoundTitle": "Person not found"
+  },
+  "reminder": {
+    "header": "Your day with people",
+    "contacts": "People to reach out to",
+    "birthdays": "Upcoming birthdays",
+    "tasks": "Tasks",
+    "nothing": "Nothing for today."
   }
 }
