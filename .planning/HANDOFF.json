@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-09T13:24:54.209Z",
+  "timestamp": "2026-06-12T15:36:27.788Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -27,16 +27,8 @@
     {
       "status": "M",
       "path": "pnpm-lock.yaml"
-    },
-    {
-      "status": "??",
-      "path": "prisma.config.ts"
-    },
-    {
-      "status": "??",
-      "path": "prisma/"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\na36a5ad feat: app shell with bottom nav, four tabs, and locale switcher\ne7d11a7 chore: initialize shadcn/ui with button primitive\n133835e feat: add next-intl with EN default + UK locale (cookie-based)\n6c1e15c test: add vitest + testing-library with smoke test\n14fa5ac chore: scaffold Next.js app (ts, tailwind, app router, src dir)"
+  "context_notes": "Recent commits:\nb7ee843 docs: add Phase 3 (people + person card) implementation plan\n29d31c9 chore: login layout padding and clarifying comments\ne5949ff fix: harden auth redirect, db config, RLS test, and middleware convention\n0f9aa96 test: make RLS test prove anon denial by seeding a row via Prisma\n84d997e test: RLS deny-by-default integration test (anon path) + load .env in vitest"
 }
