@@ -95,6 +95,10 @@ export async function createPersonAction(
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  // Commit the row first. From here the person ALWAYS exists, so every exit path
+  // redirects to the card — never back to the empty /new form (which would let a
+  // resubmit create a duplicate). A failed photo upload is surfaced non-fatally
+  // via ?photoError=1 rather than blocking the save.
   const person = await createPerson(user.id, parsed.data);
 
   const { photoUrl, photoError } = await maybeUploadPhoto(
@@ -104,10 +108,7 @@ export async function createPersonAction(
   if (photoUrl) await updatePersonPhoto(user.id, person.id, photoUrl);
 
   revalidatePath("/people");
-  if (photoError) {
-    return { status: "error", fieldErrors: { photo: "people.errors.photo" } };
-  }
-  redirect(`/people/${person.id}`);
+  redirect(`/people/${person.id}${photoError ? "?photoError=1" : ""}`);
 }
 
 export async function updatePersonAction(
@@ -121,6 +122,8 @@ export async function updatePersonAction(
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
 
+  // Save the edits first, then upload. A failed photo upload never blocks the
+  // save: we redirect to the card with ?photoError=1 for a non-fatal notice.
   await updatePerson(user.id, personId, parsed.data);
 
   const { photoUrl, photoError } = await maybeUploadPhoto(
@@ -131,10 +134,7 @@ export async function updatePersonAction(
 
   revalidatePath(`/people/${personId}`);
   revalidatePath("/people");
-  if (photoError) {
-    return { status: "error", fieldErrors: { photo: "people.errors.photo" } };
-  }
-  redirect(`/people/${personId}`);
+  redirect(`/people/${personId}${photoError ? "?photoError=1" : ""}`);
 }
 
 export async function deletePersonAction(formData: FormData): Promise<void> {

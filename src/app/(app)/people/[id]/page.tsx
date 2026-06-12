@@ -17,10 +17,15 @@ import { DeletePersonButton } from "./_components/delete-person-button";
 
 export default async function PersonCardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ photoError?: string }>;
 }) {
   const { id } = await params;
+  // Next 16: searchParams is a Promise. A failed photo upload during create/edit
+  // redirects here with ?photoError=1 so we can show a non-blocking notice.
+  const { photoError } = await searchParams;
   const user = await requireUser();
   const person = await getPerson(user.id, id);
   if (!person) notFound();
@@ -38,6 +43,15 @@ export default async function PersonCardPage({
 
   return (
     <section className="space-y-6">
+      {photoError ? (
+        <p
+          role="status"
+          className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          {t("errors.photoUpload")}
+        </p>
+      ) : null}
+
       {/* Header */}
       <div className="flex items-start gap-3">
         <PersonAvatar

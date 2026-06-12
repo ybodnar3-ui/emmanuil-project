@@ -80,7 +80,8 @@
     },
     "errors": {
       "invalid": "Please check this field.",
-      "photo": "Photo upload failed, but the rest was saved."
+      "photo": "Photo upload failed, but the rest was saved.",
+      "photoUpload": "Photo upload failed, but the rest was saved."
     }
   },
   "assistant": { "title": "Assistant", "placeholder": "Ask about someone, or add a fact…" },
