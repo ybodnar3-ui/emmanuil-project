@@ -167,6 +167,14 @@
     "emailPlaceholder": "you@example.com",
     "sendLink": "Send magic link",
     "linkSent": "Check your email for a sign-in link.",
+    "linkExpired": "That sign-in link has expired or was already used. Enter your email to get a new one.",
     "error": "Something went wrong. Please try again."
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "description": "We couldn't load this page. Please try again.",
+    "retry": "Try again",
+    "backToPeople": "Back to People",
+    "notFoundTitle": "Person not found"
   }
 }
