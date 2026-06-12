@@ -57,6 +57,7 @@ export async function applyProposal(
     throw new Error("Empty proposal");
   }
 
+  // interaction timestamp = confirmation time (server); never trust a client-supplied date
   const date = new Date();
 
   return prisma.$transaction(async (tx) => {

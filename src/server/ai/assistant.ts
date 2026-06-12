@@ -167,11 +167,12 @@ export async function answerQuestion(
       ],
     });
     const text = res.content
-      .filter((b) => b.type === "text")
-      .map((b) => (b as { text: string }).text)
+      .map((b) => ("text" in b ? b.text : ""))
       .join("")
       .trim();
-    if (!text) return { status: "error", message: "EMPTY" };
+    // An empty model response is an unknown-response failure; collapse it into
+    // the single REQUEST_FAILED contract the UI already knows how to localize.
+    if (!text) return { status: "error", message: "REQUEST_FAILED" };
     return { status: "ok", answer: text };
   } catch {
     return { status: "error", message: "REQUEST_FAILED" };

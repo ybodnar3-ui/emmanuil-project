@@ -177,10 +177,10 @@ describe("answerQuestion (mocked client)", () => {
     expect(args.system).toContain("ONLY the provided data");
   });
 
-  it("returns EMPTY when the response has no text content", async () => {
+  it("returns REQUEST_FAILED when the response has no text content", async () => {
     create.mockResolvedValue({ content: [] });
     const result = await answerQuestion(person(), "q", "en");
-    expect(result).toEqual({ status: "error", message: "EMPTY" });
+    expect(result).toEqual({ status: "error", message: "REQUEST_FAILED" });
   });
 
   it("returns REQUEST_FAILED on throw without leaking the key", async () => {

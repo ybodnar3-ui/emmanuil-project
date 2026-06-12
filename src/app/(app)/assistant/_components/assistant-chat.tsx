@@ -21,14 +21,14 @@ type Entry =
   | { id: number; role: "user"; text: string }
   | { id: number; role: "assistant"; result: AssistantResult };
 
-let nextId = 0;
-
 export function AssistantChat() {
   const t = useTranslations("assistant");
   const [entries, setEntries] = useState<Entry[]>([]);
   const [value, setValue] = useState("");
   const [pending, startTransition] = useTransition();
   const logRef = useRef<HTMLDivElement>(null);
+  // Per-mount key counter: stable across HMR/navigation, no module state.
+  const nextIdRef = useRef(0);
 
   // Keep the newest message in view as the thread grows.
   useEffect(() => {
@@ -38,7 +38,7 @@ export function AssistantChat() {
   function send() {
     const text = value.trim();
     if (!text || pending) return;
-    setEntries((prev) => [...prev, { id: nextId++, role: "user", text }]);
+    setEntries((prev) => [...prev, { id: nextIdRef.current++, role: "user", text }]);
     setValue("");
     startTransition(async () => {
       let result: AssistantResult;
@@ -47,7 +47,7 @@ export function AssistantChat() {
       } catch {
         result = { kind: "error", code: "generic" };
       }
-      setEntries((prev) => [...prev, { id: nextId++, role: "assistant", result }]);
+      setEntries((prev) => [...prev, { id: nextIdRef.current++, role: "assistant", result }]);
     });
   }
 

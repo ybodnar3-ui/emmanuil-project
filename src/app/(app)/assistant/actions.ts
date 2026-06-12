@@ -80,6 +80,9 @@ export async function assistantSendAction(
     return { kind: "clarify", reply: i.reply, mentionedName: i.mentionedName };
   }
 
+  // A query/capture intent whose personId couldn't be resolved (or whose person
+  // isn't owned) intentionally falls through to a chat reply: the model's reply
+  // already asks the user to clarify which person they mean.
   return { kind: "chat", reply: i.reply };
 }
 
