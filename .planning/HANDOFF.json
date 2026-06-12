@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-12T15:36:27.788Z",
+  "timestamp": "2026-06-12T15:40:13.908Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -21,14 +21,14 @@
       "path": ".planning/HANDOFF.json"
     },
     {
-      "status": "M",
-      "path": "package.json"
+      "status": "??",
+      "path": "src/app/(app)/people/actions.ts"
     },
     {
-      "status": "M",
-      "path": "pnpm-lock.yaml"
+      "status": "??",
+      "path": "src/server/storage.ts"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\nb7ee843 docs: add Phase 3 (people + person card) implementation plan\n29d31c9 chore: login layout padding and clarifying comments\ne5949ff fix: harden auth redirect, db config, RLS test, and middleware convention\n0f9aa96 test: make RLS test prove anon denial by seeding a row via Prisma\n84d997e test: RLS deny-by-default integration test (anon path) + load .env in vitest"
+  "context_notes": "Recent commits:\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping\n9bc68d7 feat: cadence math + zod validation schemas\nb7ee843 docs: add Phase 3 (people + person card) implementation plan\n29d31c9 chore: login layout padding and clarifying comments"
 }
