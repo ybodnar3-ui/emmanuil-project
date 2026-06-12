@@ -25,9 +25,6 @@ export async function logInteraction(
   await assertPersonOwned(userId, personId);
   const date = input.date ?? new Date();
 
-  // Read cadence outside the transaction; we only need its interval to recompute.
-  const cadence = await prisma.cadence.findUnique({ where: { personId } });
-
   return prisma.$transaction(async (tx) => {
     const interaction = await tx.interaction.create({
       data: {
@@ -38,6 +35,10 @@ export async function logInteraction(
       },
     });
 
+    // Read the cadence INSIDE the transaction so a concurrent clearCadence can't
+    // make the update below throw P2025 and roll back the interaction. We only
+    // bump it if it still exists.
+    const cadence = await tx.cadence.findUnique({ where: { personId } });
     if (cadence) {
       await tx.cadence.update({
         where: { personId },

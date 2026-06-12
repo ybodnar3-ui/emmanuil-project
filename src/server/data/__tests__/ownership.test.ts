@@ -19,7 +19,7 @@ const factDelete = vi.fn();
 const interactionCreate = vi.fn();
 const interactionFindMany = vi.fn();
 const cadenceUpsert = vi.fn();
-const cadenceDelete = vi.fn();
+const cadenceDeleteMany = vi.fn();
 const cadenceFindUnique = vi.fn();
 const transaction = vi.fn();
 
@@ -43,7 +43,7 @@ vi.mock("@/server/db", () => ({
     },
     cadence: {
       upsert: (...a: unknown[]) => cadenceUpsert(...a),
-      delete: (...a: unknown[]) => cadenceDelete(...a),
+      deleteMany: (...a: unknown[]) => cadenceDeleteMany(...a),
       findUnique: (...a: unknown[]) => cadenceFindUnique(...a),
     },
     // Run the transaction callback against the same mocked client.
@@ -75,7 +75,7 @@ function resetAll() {
     interactionCreate,
     interactionFindMany,
     cadenceUpsert,
-    cadenceDelete,
+    cadenceDeleteMany,
     cadenceFindUnique,
     transaction,
   ]) {
@@ -186,7 +186,8 @@ describe("Facts ownership", () => {
 describe("Interactions ownership + cadence bump", () => {
   it("logInteraction asserts ownership and advances nextDueAt from the interaction date", async () => {
     personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
-    cadenceFindUnique.mockResolvedValue({
+    // The cadence read now happens via the tx client INSIDE the transaction.
+    const txCadenceFindUnique = vi.fn().mockResolvedValue({
       id: "c1",
       personId: "p1",
       intervalDays: 30,
@@ -197,7 +198,10 @@ describe("Interactions ownership + cadence bump", () => {
     transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
       cb({
         interaction: { create: txInteractionCreate },
-        cadence: { update: txCadenceUpdate },
+        cadence: {
+          findUnique: txCadenceFindUnique,
+          update: txCadenceUpdate,
+        },
       }),
     );
 
@@ -219,13 +223,16 @@ describe("Interactions ownership + cadence bump", () => {
 
   it("logInteraction does not error when there is no cadence", async () => {
     personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
-    cadenceFindUnique.mockResolvedValue(null);
+    const txCadenceFindUnique = vi.fn().mockResolvedValue(null);
     const txInteractionCreate = vi.fn().mockResolvedValue({ id: "i1" });
     const txCadenceUpdate = vi.fn();
     transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
       cb({
         interaction: { create: txInteractionCreate },
-        cadence: { update: txCadenceUpdate },
+        cadence: {
+          findUnique: txCadenceFindUnique,
+          update: txCadenceUpdate,
+        },
       }),
     );
     await logInteraction("u1", "p1", { summary: "Note" });
@@ -256,10 +263,31 @@ describe("Cadence ownership", () => {
 
   it("clearCadence asserts ownership before deleting", async () => {
     personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
-    cadenceDelete.mockResolvedValue({ id: "c1" });
+    cadenceDeleteMany.mockResolvedValue({ count: 1 });
     await clearCadence("u1", "p1");
+    expect(cadenceDeleteMany.mock.calls[0][0]).toEqual({
+      where: { personId: "p1" },
+    });
     expect(personFindFirst.mock.invocationCallOrder[0]).toBeLessThan(
-      cadenceDelete.mock.invocationCallOrder[0],
+      cadenceDeleteMany.mock.invocationCallOrder[0],
     );
+  });
+
+  it("clearCadence is a no-op (does not throw) when no cadence exists", async () => {
+    personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
+    // deleteMany returns count: 0 rather than throwing P2025 like delete().
+    cadenceDeleteMany.mockResolvedValue({ count: 0 });
+    await expect(clearCadence("u1", "p1")).resolves.toEqual({ count: 0 });
+    // Ownership is still checked first.
+    expect(personFindFirst).toHaveBeenCalled();
+    expect(personFindFirst.mock.invocationCallOrder[0]).toBeLessThan(
+      cadenceDeleteMany.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("clearCadence refuses (throws) when the person is not owned", async () => {
+    personFindFirst.mockResolvedValue(null);
+    await expect(clearCadence("u1", "p1")).rejects.toThrow();
+    expect(cadenceDeleteMany).not.toHaveBeenCalled();
   });
 });

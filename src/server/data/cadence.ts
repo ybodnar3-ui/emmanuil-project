@@ -28,5 +28,7 @@ export async function setCadence(
 
 export async function clearCadence(userId: string, personId: string) {
   await assertPersonOwned(userId, personId);
-  return prisma.cadence.delete({ where: { personId } });
+  // deleteMany is a no-op (count: 0) when no cadence exists, so a double-submit
+  // can't throw P2025 like delete() would.
+  return prisma.cadence.deleteMany({ where: { personId } });
 }
