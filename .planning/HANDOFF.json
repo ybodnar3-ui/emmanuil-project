@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-12T15:43:19.087Z",
+  "timestamp": "2026-06-12T15:44:26.023Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -18,17 +18,13 @@
   "uncommitted_files": [
     {
       "status": "??",
-      "path": "src/app/(app)/people/[id]/"
+      "path": "src/app/(app)/people/[id]/_components/"
     },
     {
       "status": "??",
-      "path": "src/app/(app)/people/_components/person-form.tsx"
-    },
-    {
-      "status": "??",
-      "path": "src/app/(app)/people/new/"
+      "path": "src/app/(app)/people/[id]/page.tsx"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\n52b0593 feat: people list with search and filters\nd040804 feat: people server actions with zod validation\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping\n9bc68d7 feat: cadence math + zod validation schemas"
+  "context_notes": "Recent commits:\n5bab318 feat: create/edit person form\n52b0593 feat: people list with search and filters\nd040804 feat: people server actions with zod validation\nbdaa63d feat: facts/interactions/cadence data layer\n9e87ea0 feat: people CRUD data layer with ownership scoping"
 }
