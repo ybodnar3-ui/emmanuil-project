@@ -35,7 +35,7 @@ export async function connectTelegramAction(): Promise<ConnectResult> {
   }
 
   try {
-    const code = randomBytes(8).toString("hex");
+    const code = randomBytes(16).toString("hex");
     await setLinkCode(user.id, code);
     return {
       status: "ok",

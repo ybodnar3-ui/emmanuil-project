@@ -26,7 +26,17 @@ import { logError } from "@/server/log";
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization");
-  if (!secret || auth !== `Bearer ${secret}`) {
+  if (!secret) {
+    // Distinct from a wrong/missing header: surface WHY reminders silently
+    // stop in prod. Security behavior is unchanged (still 401); the secret and
+    // the incoming header value are never logged.
+    logError(
+      "cron.reminders",
+      new Error("CRON_SECRET is not set — cron will reject all requests"),
+    );
+    return new Response("unauthorized", { status: 401 });
+  }
+  if (auth !== `Bearer ${secret}`) {
     return new Response("unauthorized", { status: 401 });
   }
 
