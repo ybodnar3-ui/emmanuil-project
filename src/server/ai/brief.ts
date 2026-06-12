@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { getAnthropic, BRIEF_MODEL } from "./client";
+import { logError } from "@/server/log";
 
 /**
  * The structured shape we ask Claude to return. The model is instructed to
@@ -114,9 +115,11 @@ export async function generateBrief(
     // a response with no text/content block to parse, leaving parsed_output null.
     if (!parsed) return { status: "error", message: "PARSE_FAILED" };
     return { status: "ok", brief: parsed };
-  } catch {
-    // Do NOT leak provider error text (may contain request details) or the key.
-    // Return a stable code; the UI maps it to a localized message.
+  } catch (err) {
+    // Log server-side for observability, but do NOT leak provider error text
+    // (may contain request details) or the key. Return a stable code; the UI
+    // maps it to a localized message.
+    logError("ai.brief", err);
     return { status: "error", message: "REQUEST_FAILED" };
   }
 }

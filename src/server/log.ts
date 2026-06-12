@@ -21,7 +21,7 @@ export function logError(scope: string, err: unknown, meta?: Meta): void {
           message: err.message,
           name: err.name,
           ...(typeof (err as { code?: unknown }).code === "string"
-            ? { code: (err as { code: string }).code }
+            ? { code: (err as { code?: unknown }).code as string }
             : {}),
         }
       : { message: String(err) };

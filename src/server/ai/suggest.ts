@@ -1,5 +1,6 @@
 import { getAnthropic, BRIEF_MODEL } from "./client";
 import { buildBriefContext, type PersonForBrief } from "./brief";
+import { logError } from "@/server/log";
 
 /**
  * On-demand "what to say" suggestion for one feed item. Reuses the Phase 4
@@ -58,8 +59,9 @@ export async function suggestTalkingPoint(
 
     if (!text) return { status: "error", message: "PARSE_FAILED" };
     return { status: "ok", suggestion: text };
-  } catch {
-    // Do NOT leak provider error text or the key. Stable code only.
+  } catch (err) {
+    // Log server-side; do NOT leak provider error text or the key. Stable code only.
+    logError("ai.suggest", err);
     return { status: "error", message: "REQUEST_FAILED" };
   }
 }

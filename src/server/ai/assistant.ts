@@ -3,6 +3,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { getAnthropic, BRIEF_MODEL } from "./client";
 import { buildBriefContext, type PersonForBrief } from "./brief";
 import { FACT_CATEGORIES, INTERACTION_CHANNELS } from "@/server/validation/person";
+import { logError } from "@/server/log";
 
 /**
  * The structured shape Claude returns when interpreting a user's message to the
@@ -125,8 +126,10 @@ export async function interpretMessage(
     // → REQUEST_FAILED). This only fires when the SDK returns no parseable block.
     if (!parsed) return { status: "error", message: "PARSE_FAILED" };
     return { status: "ok", interpretation: parsed };
-  } catch {
-    // Do NOT leak provider error text (may carry request details) or the key.
+  } catch (err) {
+    // Log server-side; do NOT leak provider error text (may carry request
+    // details) or the key to the client.
+    logError("ai.assistant.interpret", err);
     return { status: "error", message: "REQUEST_FAILED" };
   }
 }
@@ -174,7 +177,8 @@ export async function answerQuestion(
     // the single REQUEST_FAILED contract the UI already knows how to localize.
     if (!text) return { status: "error", message: "REQUEST_FAILED" };
     return { status: "ok", answer: text };
-  } catch {
+  } catch (err) {
+    logError("ai.assistant.answer", err);
     return { status: "error", message: "REQUEST_FAILED" };
   }
 }

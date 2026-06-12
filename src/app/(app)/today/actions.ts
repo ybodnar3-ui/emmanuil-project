@@ -13,6 +13,7 @@ import {
 } from "@/server/data/tasks";
 import { taskInputSchema } from "@/server/validation/task";
 import { suggestTalkingPoint, type SuggestResult } from "@/server/ai/suggest";
+import { logError } from "@/server/log";
 
 /**
  * Server actions for the Today feed. Each one calls requireUser() FIRST, then
@@ -50,7 +51,8 @@ export async function markContactedAction(
   try {
     // Throws if the person was deleted between render and this click.
     await markContacted(user.id, personId, new Date());
-  } catch {
+  } catch (err) {
+    logError("action.markContacted", err, { userId: user.id, personId });
     return { status: "error" as const, message: "NOT_FOUND" };
   }
   revalidatePath("/");
@@ -66,7 +68,8 @@ export async function snoozeContactAction(
   try {
     // Throws if the person was deleted between render and this click.
     await snoozeCadence(user.id, personId, days, new Date());
-  } catch {
+  } catch (err) {
+    logError("action.snoozeContact", err, { userId: user.id, personId });
     return { status: "error" as const, message: "NOT_FOUND" };
   }
   revalidatePath("/");
@@ -111,7 +114,8 @@ export async function createTaskAction(
   // if the selected person was deleted between render and submit.
   try {
     await createTask(user.id, parsed.data);
-  } catch {
+  } catch (err) {
+    logError("action.createTask", err, { userId: user.id });
     return { status: "error", fieldErrors: { personId: "NOT_FOUND" } };
   }
   revalidatePath("/");

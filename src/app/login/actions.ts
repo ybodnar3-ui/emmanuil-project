@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/server/supabase/server";
+import { logError } from "@/server/log";
 
 export type SendMagicLinkState =
   | { status: "idle" }
@@ -37,6 +38,11 @@ export async function sendMagicLink(
     },
   });
 
-  if (error) return { status: "error" };
+  // signInWithOtp returns (not throws) on failure; log the provider error
+  // server-side and surface only the generic stable status to the client.
+  if (error) {
+    logError("auth.signInWithOtp", error);
+    return { status: "error" };
+  }
   return { status: "sent", email };
 }

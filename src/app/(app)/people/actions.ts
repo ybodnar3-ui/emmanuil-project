@@ -23,6 +23,7 @@ import {
   cadenceInputSchema,
 } from "@/server/validation/person";
 import { ensureAvatarsBucket, uploadAvatar } from "@/server/storage";
+import { logError } from "@/server/log";
 
 /**
  * Shared form-action result. `ok` is the happy path; `error` carries an optional
@@ -83,7 +84,8 @@ async function maybeUploadPhoto(
     await ensureAvatarsBucket();
     const photoUrl = await uploadAvatar(userId, file);
     return { photoUrl };
-  } catch {
+  } catch (err) {
+    logError("action.photoUpload", err, { userId });
     return { photoError: true };
   }
 }

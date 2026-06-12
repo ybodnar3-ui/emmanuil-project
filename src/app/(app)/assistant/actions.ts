@@ -9,6 +9,7 @@ import {
   answerQuestion,
 } from "@/server/ai/assistant";
 import { listRoster, applyProposal } from "@/server/data/proposals";
+import { logError } from "@/server/log";
 
 /**
  * Two-step, roster-aware conversational entry point. The assistant first
@@ -106,7 +107,8 @@ export async function applyProposalAction(input: {
     });
     revalidatePath(`/people/${input.personId}`);
     return { status: "ok" };
-  } catch {
+  } catch (err) {
+    logError("action.applyProposal", err, { userId: user.id });
     return { status: "error" };
   }
 }

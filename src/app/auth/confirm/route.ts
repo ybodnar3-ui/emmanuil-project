@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/server/supabase/server";
+import { logError } from "@/server/log";
 
 /**
  * Magic-link / OTP callback. Supabase appends `token_hash` + `type` to the
@@ -27,8 +28,12 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(new URL(next, origin));
     }
+    // The OTP was present but verification failed (commonly an expired/used
+    // link). Log it server-side and hint the user on the login page.
+    logError("auth.verifyOtp", error);
+    return NextResponse.redirect(new URL("/login?error=expired", origin));
   }
 
-  // Verification failed or params missing — send the user back to login.
+  // Params missing — send the user back to login without a specific hint.
   return NextResponse.redirect(new URL("/login", origin));
 }
