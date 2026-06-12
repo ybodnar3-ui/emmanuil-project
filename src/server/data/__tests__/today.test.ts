@@ -1,0 +1,103 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+/**
+ * Scoping contract for the Today read layer (mocked db):
+ *  - the cadence query scopes via the person relation (person: { userId }) and
+ *    bounds nextDueAt by end-of-today
+ *  - the people/birthday query scopes by userId and only those with a birthday
+ *  - the task query scopes by userId + status + dueAt
+ *  - getTodayFeed returns the assembled, ordered FeedItem[] from the rows
+ */
+
+const cadenceFindMany = vi.fn();
+const personFindMany = vi.fn();
+const taskFindMany = vi.fn();
+
+vi.mock("@/server/db", () => ({
+  prisma: {
+    cadence: { findMany: (...a: unknown[]) => cadenceFindMany(...a) },
+    person: { findMany: (...a: unknown[]) => personFindMany(...a) },
+    task: { findMany: (...a: unknown[]) => taskFindMany(...a) },
+  },
+}));
+
+import { getTodayData, getTodayFeed } from "@/server/data/today";
+import { endOfUtcDay } from "@/server/today/dates";
+
+const now = new Date("2026-06-12T10:00:00.000Z");
+
+beforeEach(() => {
+  for (const fn of [cadenceFindMany, personFindMany, taskFindMany]) {
+    fn.mockReset();
+  }
+  cadenceFindMany.mockResolvedValue([]);
+  personFindMany.mockResolvedValue([]);
+  taskFindMany.mockResolvedValue([]);
+});
+
+describe("getTodayData scoping", () => {
+  it("scopes the cadence query via person.userId and bounds nextDueAt by end of today", async () => {
+    await getTodayData("u1", now);
+    const where = cadenceFindMany.mock.calls[0][0].where;
+    expect(where.person).toEqual({ userId: "u1" });
+    expect(where.nextDueAt.lte.toISOString()).toBe(
+      endOfUtcDay(now).toISOString(),
+    );
+  });
+
+  it("scopes the people/birthday query by userId and birthday present", async () => {
+    await getTodayData("u1", now);
+    const where = personFindMany.mock.calls[0][0].where;
+    expect(where.userId).toBe("u1");
+    expect(where.birthday).toEqual({ not: null });
+  });
+
+  it("scopes the task query by userId + status todo + dueAt", async () => {
+    await getTodayData("u1", now);
+    const where = taskFindMany.mock.calls[0][0].where;
+    expect(where.userId).toBe("u1");
+    expect(where.status).toBe("todo");
+    expect(where.dueAt.lte.toISOString()).toBe(endOfUtcDay(now).toISOString());
+  });
+
+  it("filters birthdays in memory by the window (default 7 days)", async () => {
+    personFindMany.mockResolvedValue([
+      { id: "p-soon", fullName: "Soon", birthday: new Date("1990-06-15T00:00:00.000Z") }, // in 3 days
+      { id: "p-far", fullName: "Far", birthday: new Date("1990-09-01T00:00:00.000Z") }, // far away
+    ]);
+    const data = await getTodayData("u1", now);
+    expect(data.birthdays.map((b) => b.personId)).toEqual(["p-soon"]);
+  });
+});
+
+describe("getTodayFeed", () => {
+  it("returns the assembled ordered list from the queried rows", async () => {
+    cadenceFindMany.mockResolvedValue([
+      {
+        intervalDays: 30,
+        nextDueAt: new Date("2026-06-05T00:00:00.000Z"), // 7 days overdue
+        person: { id: "c-old", fullName: "VeryOverdue" },
+      },
+    ]);
+    personFindMany.mockResolvedValue([
+      { id: "b-today", fullName: "BdayToday", birthday: new Date("1990-06-12T00:00:00.000Z") },
+    ]);
+    taskFindMany.mockResolvedValue([
+      {
+        id: "t1",
+        title: "Old task",
+        personId: null,
+        person: null,
+        dueAt: new Date("2026-06-10T00:00:00.000Z"), // 2 days overdue
+      },
+    ]);
+
+    const feed = await getTodayFeed("u1", now);
+    const ids = feed.map((i) =>
+      i.type === "task" ? i.taskId : i.personId,
+    );
+    // Most-overdue contact, then overdue task, then today's birthday.
+    expect(ids).toEqual(["c-old", "t1", "b-today"]);
+    expect(feed[0]).toMatchObject({ type: "contact", overdueDays: 7 });
+  });
+});
