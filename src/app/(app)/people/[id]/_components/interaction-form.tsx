@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { INTERACTION_CHANNELS } from "@/server/validation/person";
 import { logInteractionAction, type FormState } from "../../actions";
+import { NATIVE_SELECT_CLASS } from "../../_components/select-styles";
 
 const initialState: FormState = { status: "idle" };
 
@@ -46,7 +47,7 @@ export function InteractionForm({ personId }: { personId: string }) {
           name="channel"
           aria-label={t("interactions.channel")}
           defaultValue=""
-          className="h-9 rounded-lg border border-border bg-background px-2.5 text-sm"
+          className={NATIVE_SELECT_CLASS}
         >
           <option value="">{t("channel.none")}</option>
           {INTERACTION_CHANNELS.map((channel) => (

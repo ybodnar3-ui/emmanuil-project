@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { RELATIONSHIP_TIERS } from "@/server/validation/person";
+import { NATIVE_SELECT_CLASS } from "./select-styles";
 
 const ALL_TIERS = "all";
 
@@ -63,7 +64,7 @@ export function PeopleSearch() {
         value={tier}
         onChange={(e) => pushParams({ tier: e.target.value })}
         aria-label={t("filterTier")}
-        className="h-9 rounded-lg border border-border bg-background px-2.5 text-sm"
+        className={NATIVE_SELECT_CLASS}
       >
         <option value={ALL_TIERS}>{t("tier.all")}</option>
         {RELATIONSHIP_TIERS.map((value) => (

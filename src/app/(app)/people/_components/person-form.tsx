@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { RELATIONSHIP_TIERS } from "@/server/validation/person";
+import { NATIVE_SELECT_CLASS } from "./select-styles";
 import type { FormState } from "../actions";
 
 type PersonFormInitial = {
@@ -69,7 +71,7 @@ export function PersonForm({
           id="relationshipTier"
           name="relationshipTier"
           defaultValue={initial?.relationshipTier ?? ""}
-          className="h-9 w-full rounded-lg border border-border bg-background px-2.5 text-sm"
+          className={cn(NATIVE_SELECT_CLASS, "w-full")}
         >
           <option value="">{t("form.tierNone")}</option>
           {RELATIONSHIP_TIERS.map((tier) => (
