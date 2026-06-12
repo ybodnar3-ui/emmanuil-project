@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { assistantSendAction, type AssistantResult } from "../actions";
 import { ProposalCard, type Proposal } from "./proposal-card";
 import { MicButton } from "./mic-button";
+import { Markdown } from "./markdown";
 
 /**
  * An ephemeral chat thread (this phase does not persist ChatMessage). Each entry
@@ -126,13 +127,21 @@ function AssistantEntry({ result }: { result: AssistantResult }) {
 
   switch (result.kind) {
     case "answer":
-      return <AssistantBubble>{result.answer}</AssistantBubble>;
+      return (
+        <AssistantBubble>
+          <Markdown>{result.answer}</Markdown>
+        </AssistantBubble>
+      );
     case "chat":
-      return <AssistantBubble>{result.reply}</AssistantBubble>;
+      return (
+        <AssistantBubble>
+          <Markdown>{result.reply}</Markdown>
+        </AssistantBubble>
+      );
     case "clarify":
       return (
         <AssistantBubble>
-          <p>{result.reply}</p>
+          <Markdown>{result.reply}</Markdown>
           <Link
             href="/people/new"
             className="mt-1 inline-block text-primary underline-offset-4 hover:underline"
