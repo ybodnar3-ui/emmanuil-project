@@ -2,6 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
+ * Read a required env var at point-of-use (per request), not at import time, so a
+ * missing value fails with a clear message rather than a cryptic deep failure
+ * inside @supabase/ssr, and the build/tests aren't broken when the var is unset.
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} is not set`);
+  return value;
+}
+
+/**
  * Refreshes the Supabase auth session on every matched request and propagates any
  * rotated auth cookies onto both the request (for downstream RSC reads) and the
  * response (back to the browser). Follows the @supabase/ssr Next.js middleware pattern.
@@ -13,8 +24,8 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
+    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
