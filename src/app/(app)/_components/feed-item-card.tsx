@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import {
   snoozeContactAction,
   completeTaskAction,
   snoozeTaskAction,
+  type ActionResult,
 } from "../today/actions";
 import { TalkingPoint } from "./talking-point";
 
@@ -24,10 +25,20 @@ import { TalkingPoint } from "./talking-point";
 export function FeedItemCard({ item }: { item: FeedItem }) {
   const t = useTranslations("today");
   const [pending, startTransition] = useTransition();
+  const [errored, setErrored] = useState(false);
+  const pid = personIdFor(item);
 
-  function run(action: () => Promise<unknown>) {
+  // Actions return a stable error result (e.g. NOT_FOUND if the person/task was
+  // deleted between render and click) instead of throwing; surface it inline.
+  function run(action: () => Promise<ActionResult>) {
+    setErrored(false);
     startTransition(async () => {
-      await action();
+      try {
+        const result = await action();
+        if (result.status === "error") setErrored(true);
+      } catch {
+        setErrored(true);
+      }
     });
   }
 
@@ -98,9 +109,9 @@ export function FeedItemCard({ item }: { item: FeedItem }) {
             </>
           ) : null}
 
-          {personIdFor(item) ? (
+          {pid ? (
             <Button
-              render={<Link href={`/people/${personIdFor(item)}`} />}
+              render={<Link href={`/people/${pid}`} />}
               nativeButton={false}
               size="sm"
               variant="ghost"
@@ -110,11 +121,17 @@ export function FeedItemCard({ item }: { item: FeedItem }) {
           ) : null}
         </div>
 
-        {personIdFor(item) ? (
-          <TalkingPoint
-            personId={personIdFor(item) as string}
-            occasion={occasionFor(item, t)}
-          />
+        {errored ? (
+          <p
+            role="status"
+            className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {t("errors.notFound")}
+          </p>
+        ) : null}
+
+        {pid ? (
+          <TalkingPoint personId={pid} occasion={occasionFor(item, t)} />
         ) : null}
       </CardContent>
     </Card>
@@ -152,5 +169,8 @@ function occasionFor(item: FeedItem, t: TFn): string {
       : t("birthdayInDays", { days: item.inDays });
   }
   if (item.type === "task") return item.title;
-  return t("section.contacts");
+  // contact: give the model the real reason (overdue/due-today), not the heading.
+  return item.overdueDays === 0
+    ? t("dueToday")
+    : t("overdue", { days: item.overdueDays });
 }

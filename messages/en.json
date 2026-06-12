@@ -21,7 +21,8 @@
       "button": "What to say?",
       "loading": "Thinking…",
       "error": "Could not get a suggestion. Please try again."
-    }
+    },
+    "errors": { "notFound": "That item is no longer available. Refresh to update your feed." }
   },
   "tasks": {
     "add": "Add task",
@@ -30,7 +31,10 @@
     "personLabel": "Person",
     "noteLabel": "Note",
     "none": "None",
-    "errors": { "invalid": "Please check this field." }
+    "errors": {
+      "invalid": "Please check this field.",
+      "notFound": "That person is no longer available."
+    }
   },
   "people": {
     "title": "People",

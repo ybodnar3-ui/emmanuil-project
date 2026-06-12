@@ -37,7 +37,10 @@ export function AddTaskForm({
   const fieldErrors = state.status === "error" ? state.fieldErrors : undefined;
   function errorFor(field: string) {
     const key = fieldErrors?.[field];
-    return key ? <p className="text-sm text-destructive">{t("errors.invalid")}</p> : null;
+    if (!key) return null;
+    // Data-layer NOT_FOUND (e.g. person deleted before submit) vs. zod "invalid".
+    const message = key === "NOT_FOUND" ? t("errors.notFound") : t("errors.invalid");
+    return <p className="text-sm text-destructive">{message}</p>;
   }
 
   return (
@@ -74,6 +77,7 @@ export function AddTaskForm({
               </option>
             ))}
           </select>
+          {errorFor("personId")}
         </div>
       </div>
 

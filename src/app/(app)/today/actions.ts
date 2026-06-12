@@ -47,7 +47,12 @@ export async function markContactedAction(
   personId: string,
 ): Promise<ActionResult> {
   const user = await requireUser();
-  await markContacted(user.id, personId, new Date());
+  try {
+    // Throws if the person was deleted between render and this click.
+    await markContacted(user.id, personId, new Date());
+  } catch {
+    return { status: "error" as const, message: "NOT_FOUND" };
+  }
   revalidatePath("/");
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
@@ -58,7 +63,12 @@ export async function snoozeContactAction(
   days: number,
 ): Promise<ActionResult> {
   const user = await requireUser();
-  await snoozeCadence(user.id, personId, days, new Date());
+  try {
+    // Throws if the person was deleted between render and this click.
+    await snoozeCadence(user.id, personId, days, new Date());
+  } catch {
+    return { status: "error" as const, message: "NOT_FOUND" };
+  }
   revalidatePath("/");
   revalidatePath(`/people/${personId}`);
   return { status: "ok" };
@@ -97,8 +107,13 @@ export async function createTaskAction(
   if (!parsed.success) {
     return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
   }
-  // createTask asserts ownership of personId (if set) before writing.
-  await createTask(user.id, parsed.data);
+  // createTask asserts ownership of personId (if set) before writing; it throws
+  // if the selected person was deleted between render and submit.
+  try {
+    await createTask(user.id, parsed.data);
+  } catch {
+    return { status: "error", fieldErrors: { personId: "NOT_FOUND" } };
+  }
   revalidatePath("/");
   return { status: "ok" };
 }
