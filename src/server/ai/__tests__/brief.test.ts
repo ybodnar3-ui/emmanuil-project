@@ -40,6 +40,7 @@ describe("buildBriefContext", () => {
   it("includes name, a fact line, an interaction line, and the cadence line", () => {
     const ctx = buildBriefContext(fullPerson(), "en");
     expect(ctx).toContain("Name: Maria Kovalenko");
+    expect(ctx).toContain("Birthday: 1990-05-01");
     expect(ctx).toContain("- [work] Leads design at a fintech startup");
     expect(ctx).toContain("2026-05-10 (call): Caught up about her new role");
     expect(ctx).toContain("Cadence: every 30 days; next due 2026-06-09");
@@ -59,6 +60,7 @@ describe("buildBriefContext", () => {
     expect(ctx).not.toContain("Facts:");
     expect(ctx).not.toContain("Recent interactions");
     expect(ctx).not.toContain("Cadence:");
+    expect(ctx).not.toContain("Birthday:");
   });
 
   it("includes the locale instruction for the requested locale", () => {
@@ -106,6 +108,8 @@ describe("generateBrief (mocked client)", () => {
     const userContent = args.messages[0].content as string;
     expect(userContent).toContain("Leads design at a fintech startup");
     expect(userContent).toContain("Respond in locale: en");
+    // The anti-hallucination system instruction must be present.
+    expect(args.system).toContain("ONLY the provided facts");
   });
 
   it("returns an error (no throw) when the model returns no parsed output", async () => {
@@ -129,5 +133,9 @@ describe("generateBrief (mocked client)", () => {
       expect(result.message).not.toContain("sk-ant");
       expect(result.message).not.toContain("401");
     }
+    // Guard the WHOLE serialized result: a future regression adding a
+    // detail/cause field carrying provider text would be caught here.
+    expect(JSON.stringify(result)).not.toContain("x-api-key");
+    expect(JSON.stringify(result)).not.toContain("sk-ant");
   });
 });

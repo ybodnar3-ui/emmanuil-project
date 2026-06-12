@@ -44,6 +44,7 @@ export function buildBriefContext(person: PersonForBrief, locale: string): strin
   lines.push(`Name: ${person.fullName}`);
   if (person.relationshipTier) lines.push(`Relationship: ${person.relationshipTier}`);
   if (person.location) lines.push(`Location: ${person.location}`);
+  if (person.birthday) lines.push(`Birthday: ${person.birthday.toISOString().slice(0, 10)}`);
   if (person.howWeMet) lines.push(`How we met: ${person.howWeMet}`);
   if (person.tags.length) lines.push(`Tags: ${person.tags.join(", ")}`);
   if (person.facts.length) {
@@ -107,6 +108,10 @@ export async function generateBrief(
       output_config: { format: zodOutputFormat(briefSchema) },
     });
     const parsed = res.parsed_output;
+    // Defensive guard, not the main parse-failure path: `messages.parse` +
+    // `zodOutputFormat` THROW on malformed/invalid JSON (caught below →
+    // REQUEST_FAILED). This only fires for the rare case where the SDK returns
+    // a response with no text/content block to parse, leaving parsed_output null.
     if (!parsed) return { status: "error", message: "PARSE_FAILED" };
     return { status: "ok", brief: parsed };
   } catch {
