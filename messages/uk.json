@@ -1,4 +1,5 @@
 {
+  "app": { "description": "Ваш портфель стосунків + AI-асистент" },
   "nav": { "ariaLabel": "Головне меню", "today": "Сьогодні", "people": "Люди", "assistant": "Асистент", "settings": "Налаштування" },
   "today": {
     "title": "Сьогодні",

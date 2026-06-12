@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Maskable variant: dark background fills the whole canvas edge-to-edge so the
+       OS mask (circle/squircle) clips the background, never the monogram. The "E"
+       sits inside the inner ~60% safe zone (well within the 80% maskable safe area). -->
+  <rect width="512" height="512" fill="#171717"/>
+  <!-- Monogram scaled to ~60% of canvas, centered (origin shifted to the safe zone). -->
+  <g fill="#ffffff" transform="translate(154 154) scale(0.4)">
+    <rect x="156" y="136" width="56" height="240" rx="20"/>
+    <rect x="156" y="136" width="200" height="56" rx="20"/>
+    <rect x="156" y="228" width="168" height="56" rx="20"/>
+    <rect x="156" y="320" width="200" height="56" rx="20"/>
+  </g>
+</svg>

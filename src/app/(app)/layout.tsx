@@ -15,7 +15,11 @@ export default async function AppLayout({
   await requireUser();
   return (
     <>
-      <main className="mx-auto max-w-md px-4 pb-24 pt-6">{children}</main>
+      {/* Bottom padding clears the fixed nav height plus the device safe-area
+          inset (home indicator) so content is never hidden in standalone mode. */}
+      <main className="mx-auto max-w-md px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6">
+        {children}
+      </main>
       <BottomNav />
     </>
   );

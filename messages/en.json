@@ -1,4 +1,5 @@
 {
+  "app": { "description": "Your relationship portfolio + AI assistant" },
   "nav": { "ariaLabel": "Main", "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
   "today": {
     "title": "Today",

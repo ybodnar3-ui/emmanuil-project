@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Emmanuil app mark: dark rounded square (theme primary oklch(0.205 0 0) = #171717)
+       with a light "E" monogram on the white-equivalent foreground. -->
+  <rect width="512" height="512" rx="112" ry="112" fill="#171717"/>
+  <!-- "E" monogram drawn as three rounded bars + a stem so it needs no external font. -->
+  <g fill="#ffffff">
+    <rect x="156" y="136" width="56" height="240" rx="20"/>
+    <rect x="156" y="136" width="200" height="56" rx="20"/>
+    <rect x="156" y="228" width="168" height="56" rx="20"/>
+    <rect x="156" y="320" width="200" height="56" rx="20"/>
+  </g>
+</svg>

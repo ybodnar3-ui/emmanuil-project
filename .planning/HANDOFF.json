@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-12T18:54:56.109Z",
+  "timestamp": "2026-06-12T18:58:03.029Z",
   "source": "auto-postool",
   "partial": false,
   "phase": null,
@@ -21,10 +21,46 @@
       "path": ".planning/HANDOFF.json"
     },
     {
+      "status": "M",
+      "path": "messages/en.json"
+    },
+    {
+      "status": "M",
+      "path": "messages/uk.json"
+    },
+    {
+      "status": "M",
+      "path": "package.json"
+    },
+    {
+      "status": "M",
+      "path": "pnpm-lock.yaml"
+    },
+    {
+      "status": "M",
+      "path": "src/app/(app)/layout.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/app/layout.tsx"
+    },
+    {
+      "status": "M",
+      "path": "src/components/bottom-nav.tsx"
+    },
+    {
       "status": "??",
-      "path": "src/i18n/__tests__/messages-parity.test.ts"
+      "path": "public/icons/"
+    },
+    {
+      "status": "??",
+      "path": "scripts/"
+    },
+    {
+      "status": "??",
+      "path": "src/app/manifest.ts"
     }
   ],
   "next_action": null,
-  "context_notes": "Recent commits:\nd275130 docs: add Phase 7 (i18n completeness + PWA-readiness) implementation plan\n77d581c refactor: dedupe MS_PER_DAY between dates.ts and feed.ts\nddc0e4f fix: degrade deleted-person/task action throws to stable NOT_FOUND result\n31a991b feat: Today feed UI with Done/Snooze, tasks, and talking points\n74efde6 feat: talking-point AI + Today server actions"
+  "context_notes": "Recent commits:\nb7db024 feat: i18n completeness sweep + EN/UK parity test\nd275130 docs: add Phase 7 (i18n completeness + PWA-readiness) implementation plan\n77d581c refactor: dedupe MS_PER_DAY between dates.ts and feed.ts\nddc0e4f fix: degrade deleted-person/task action throws to stable NOT_FOUND result\n31a991b feat: Today feed UI with Done/Snooze, tasks, and talking points"
 }
