@@ -9,14 +9,18 @@ datasource db {
 }
 
 model User {
-  id           String        @id // equals Supabase auth UID
-  email        String        @unique
-  name         String?
-  locale       String        @default("en")
-  createdAt    DateTime      @default(now())
-  people       Person[]
-  tasks        Task[]
-  chatMessages ChatMessage[]
+  id               String        @id // equals Supabase auth UID
+  email            String        @unique
+  name             String?
+  locale           String        @default("en")
+  // Telegram link (Phase 8). Both nullable + unique: telegramChatId is the linked
+  // DM target; telegramLinkCode is a one-time code minted in Settings, cleared on use.
+  telegramChatId   String?       @unique
+  telegramLinkCode String?       @unique
+  createdAt        DateTime      @default(now())
+  people           Person[]
+  tasks            Task[]
+  chatMessages     ChatMessage[]
 }
 
 model Person {
