@@ -4,12 +4,16 @@ import { createSupabaseServerClient } from "@/server/supabase/server";
 import { logError } from "@/server/log";
 
 /**
- * Magic-link / OTP callback. Supabase appends `token_hash` + `type` to the
- * emailRedirectTo URL. We verify the OTP (which sets the session cookies via the
- * server client's setAll) and redirect to the post-login destination.
+ * Auth callback. Handles two flows:
+ *  - OAuth (PKCE): Supabase appends a `code` query param; we exchange it for a
+ *    session via exchangeCodeForSession.
+ *  - Magic-link / OTP: Supabase appends `token_hash` + `type`; we verify the OTP.
+ * Both set the session cookies via the server client's setAll, then redirect to
+ * the post-login destination.
  */
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   // Sanitize `next`: only accept a same-origin relative path so a crafted
@@ -18,6 +22,19 @@ export async function GET(request: NextRequest) {
   const rawNext = searchParams.get("next") ?? "/";
   const next =
     rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+
+  // OAuth code takes precedence: Google redirects back here with `?code=...`.
+  if (code) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return NextResponse.redirect(new URL(next, origin));
+    }
+    // Exchange failed (expired/used code, or PKCE verifier missing). Log it and
+    // hint the user on the login page.
+    logError("auth.exchangeCode", error);
+    return NextResponse.redirect(new URL("/login?error=expired", origin));
+  }
 
   if (tokenHash && type) {
     const supabase = await createSupabaseServerClient();

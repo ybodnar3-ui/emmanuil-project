@@ -9,13 +9,47 @@ export type SendMagicLinkState =
   | { status: "sent"; email: string }
   | { status: "error" };
 
+export type SignInWithGoogleResult =
+  | { status: "ok"; url: string }
+  | { status: "error" };
+
+/**
+ * Starts the Google OAuth (PKCE) flow. We don't redirect server-side: with the
+ * `@supabase/ssr` server client, `signInWithOAuth` returns the provider
+ * authorization URL (and sets the PKCE code-verifier cookie via the client's
+ * setAll), and the client navigates the browser to it. Google then redirects
+ * back to /auth/confirm with a `code`, which we exchange for a session.
+ *
+ * Requires the Google provider to be enabled in the Supabase dashboard. If it
+ * isn't, the provider returns an error and we surface the stable "error" state
+ * (the UI shows auth.googleError) rather than crashing.
+ */
+export async function signInWithGoogleAction(): Promise<SignInWithGoogleResult> {
+  const supabase = await createSupabaseServerClient();
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const host = h.get("host");
+  const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `${proto}://${host}`;
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${origin}/auth/confirm` },
+    });
+    if (error || !data?.url) {
+      if (error) logError("auth.signInWithGoogle", error);
+      return { status: "error" };
+    }
+    return { status: "ok", url: data.url };
+  } catch (err) {
+    logError("auth.signInWithGoogle", err);
+    return { status: "error" };
+  }
+}
+
 /**
  * Sends a passwordless magic link to the submitted email. The link points back to
  * /auth/confirm, which verifies the OTP and establishes the session.
- *
- * Google OAuth is deferred (Phase later): to add it, call
- * supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo } })
- * from a separate action and add a button on the login page.
  */
 export async function sendMagicLink(
   _prev: SendMagicLinkState,
