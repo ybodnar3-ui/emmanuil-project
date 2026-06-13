@@ -1,0 +1,9 @@
+# Never upload local env files to the Vercel build — env vars are set in the
+# Vercel project settings. (Belt-and-suspenders; .env is already gitignored.)
+.env
+.env.*
+!.env.example
+
+# Local/dev-only artifacts not needed for the build
+.planning/
+docs/
