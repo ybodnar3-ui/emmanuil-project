@@ -61,18 +61,20 @@ export function LoginForm({ linkExpired = false }: { linkExpired?: boolean }) {
   }
 
   return (
-    <section className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4">
-      <h1 className="text-2xl font-semibold">{t("signIn")}</h1>
+    <section className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5">
+      <div className="ql-rise rounded-2xl border border-border bg-card px-6 py-8 shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
+      <h1 className="text-3xl font-semibold">{t("signIn")}</h1>
       <p className="mt-2 text-sm text-muted-foreground">{t("signInHint")}</p>
 
       {state.status !== "sent" ? (
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-7 flex flex-col gap-3">
           <Button
             type="button"
+            variant="outline"
             onClick={handleGoogle}
             disabled={googlePending}
             aria-busy={googlePending}
-            className="gap-2"
+            className="h-11 gap-2.5"
           >
             <GoogleIcon />
             {t("continueWithGoogle")}
@@ -97,14 +99,14 @@ export function LoginForm({ linkExpired = false }: { linkExpired?: boolean }) {
       {linkExpired && state.status !== "sent" ? (
         <p
           role="alert"
-          className="mt-4 rounded-md border border-border bg-muted/40 p-3 text-sm"
+          className="mt-4 rounded-lg border border-border bg-accent/40 p-3 text-sm"
         >
           {t("linkExpired")}
         </p>
       ) : null}
 
       {state.status === "sent" ? (
-        <p className="mt-6 rounded-md border border-border bg-muted/40 p-4 text-sm">
+        <p className="mt-6 rounded-lg border border-border bg-accent/40 p-4 text-sm">
           {t("linkSent")}
         </p>
       ) : (
@@ -120,16 +122,17 @@ export function LoginForm({ linkExpired = false }: { linkExpired?: boolean }) {
             autoComplete="email"
             inputMode="email"
             placeholder={t("emailPlaceholder")}
-            className="rounded-md border border-input bg-background px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-11 rounded-lg border border-input bg-card px-3 text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
           />
           {state.status === "error" ? (
             <p className="text-sm text-destructive">{t("error")}</p>
           ) : null}
-          <Button type="submit" variant="outline" disabled={pending}>
+          <Button type="submit" className="h-11" disabled={pending}>
             {t("sendLink")}
           </Button>
         </form>
       )}
+      </div>
     </section>
   );
 }

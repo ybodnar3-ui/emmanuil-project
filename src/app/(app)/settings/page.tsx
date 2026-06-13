@@ -11,26 +11,31 @@ export default async function SettingsPage() {
   const user = await requireUser();
   const telegramConnected = Boolean(user.telegramChatId);
   return (
-    <section>
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
-      <div className="mt-6">
-        <p className="mb-2 text-sm font-medium">{t("language")}</p>
+    <section className="space-y-6">
+      <h1 className="text-3xl font-semibold">{t("title")}</h1>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
+        <p className="mb-3 text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          {t("language")}
+        </p>
         <LocaleSwitcher />
       </div>
-      <div className="mt-8">
-        <p className="mb-2 text-sm font-medium">{t("telegram.title")}</p>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
+        <p className="mb-3 text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          {t("telegram.title")}
+        </p>
         <ConnectTelegram connected={telegramConnected} />
       </div>
-      <div className="mt-8">
-        <form action="/auth/signout" method="post">
-          <button
-            type="submit"
-            className={buttonVariants({ variant: "outline" })}
-          >
-            {t("signOut")}
-          </button>
-        </form>
-      </div>
+
+      <form action="/auth/signout" method="post">
+        <button
+          type="submit"
+          className={buttonVariants({ variant: "outline" })}
+        >
+          {t("signOut")}
+        </button>
+      </form>
     </section>
   );
 }

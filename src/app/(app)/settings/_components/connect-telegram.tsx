@@ -100,7 +100,7 @@ export function ConnectTelegram({ connected }: { connected: boolean }) {
       ) : null}
 
       {state.status === "link" ? (
-        <div className="space-y-2 rounded-lg border bg-muted/30 px-3 py-3 text-sm">
+        <div className="space-y-2 rounded-xl border border-border bg-accent/40 px-3 py-3 text-sm">
           <p>{t("instructions")}</p>
           <a
             href={state.url}

@@ -16,7 +16,7 @@ export async function TodayFeed({ items }: { items: FeedItem[] }) {
   const tasks = items.filter((i) => i.type === "task");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {contacts.length > 0 ? (
         <FeedSection title={t("section.contacts")} items={contacts} />
       ) : null}
@@ -33,10 +33,10 @@ export async function TodayFeed({ items }: { items: FeedItem[] }) {
 function FeedSection({ title, items }: { title: string; items: FeedItem[] }) {
   return (
     <section className="space-y-3">
-      <h2 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      <h2 className="font-sans text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
         {title}
       </h2>
-      <ul className="space-y-3">
+      <ul className="ql-stagger space-y-3">
         {items.map((item) => (
           <li key={keyFor(item)}>
             <FeedItemCard item={item} />

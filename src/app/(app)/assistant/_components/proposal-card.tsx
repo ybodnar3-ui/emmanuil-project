@@ -50,7 +50,7 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
     return (
       <div
         role="status"
-        className="space-y-2 rounded-lg border bg-muted/30 px-3 py-3 text-sm"
+        className="space-y-2 rounded-2xl border border-border bg-card px-4 py-3.5 text-sm"
       >
         <p>{t("proposal.applied")}</p>
         <Link
@@ -66,10 +66,13 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
   return (
     <section
       aria-label={t("proposal.title")}
-      className="space-y-3 rounded-lg border bg-muted/30 px-3 py-3 text-sm"
+      className="space-y-3 rounded-2xl border border-border bg-card px-4 py-3.5 text-sm shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none"
     >
-      <h3 className="font-medium">
-        {t("proposal.title")} · {proposal.personName}
+      <h3 className="space-x-1.5">
+        <span className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          {t("proposal.title")}
+        </span>
+        <span className="font-heading text-base">{proposal.personName}</span>
       </h3>
 
       {proposal.facts.length > 0 ? (

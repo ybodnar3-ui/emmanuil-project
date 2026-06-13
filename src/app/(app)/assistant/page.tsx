@@ -7,7 +7,7 @@ export default async function AssistantPage() {
   const t = await getTranslations("assistant");
   return (
     <section className="flex h-full flex-col">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <h1 className="text-3xl font-semibold">{t("title")}</h1>
       <AssistantChat />
     </section>
   );

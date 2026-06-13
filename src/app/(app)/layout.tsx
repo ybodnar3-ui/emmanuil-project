@@ -17,7 +17,7 @@ export default async function AppLayout({
     <>
       {/* Bottom padding clears the fixed nav height plus the device safe-area
           inset (home indicator) so content is never hidden in standalone mode. */}
-      <main className="mx-auto max-w-md px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6">
+      <main className="ql-rise mx-auto max-w-md px-5 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-8">
         {children}
       </main>
       <BottomNav />

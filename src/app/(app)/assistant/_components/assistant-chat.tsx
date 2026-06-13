@@ -59,10 +59,14 @@ export function AssistantChat() {
         role="log"
         aria-live="polite"
         aria-busy={pending}
-        className="flex-1 space-y-3 overflow-y-auto rounded-lg border bg-card/30 p-3"
+        className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-border bg-card/60 p-4"
       >
         {entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("placeholder")}</p>
+          <div className="flex h-full min-h-40 flex-col items-center justify-center gap-1 text-center">
+            <p className="font-heading text-lg text-foreground">
+              {t("placeholder")}
+            </p>
+          </div>
         ) : null}
 
         {entries.map((entry) =>
@@ -105,7 +109,7 @@ export function AssistantChat() {
 function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex justify-end">
-      <p className="max-w-[85%] rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground">
+      <p className="max-w-[85%] rounded-2xl rounded-br-md bg-primary px-3.5 py-2 text-sm text-primary-foreground">
         {text}
       </p>
     </div>
@@ -115,7 +119,7 @@ function UserBubble({ text }: { text: string }) {
 function AssistantBubble({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex justify-start">
-      <div className="max-w-[85%] rounded-lg bg-muted px-3 py-2 text-sm">
+      <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-border bg-card px-3.5 py-2 text-sm">
         {children}
       </div>
     </div>

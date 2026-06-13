@@ -11,8 +11,8 @@ export default async function PersonNotFound() {
   const t = await getTranslations("errors");
 
   return (
-    <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-4 px-4 text-center">
-      <h1 className="text-xl font-semibold">{t("notFoundTitle")}</h1>
+    <div className="flex min-h-[60dvh] flex-col items-center justify-center gap-5 px-4 text-center">
+      <h1 className="text-2xl font-semibold">{t("notFoundTitle")}</h1>
       <Button nativeButton={false} render={<Link href="/people" />}>
         {t("backToPeople")}
       </Button>

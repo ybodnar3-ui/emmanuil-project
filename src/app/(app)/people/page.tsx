@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PeopleSearch } from "./_components/people-search";
 import { PersonAvatar } from "./_components/person-avatar";
+import { TierBadge } from "./_components/tier-badge";
 
 export default async function PeoplePage({
   searchParams,
@@ -19,9 +20,9 @@ export default async function PeoplePage({
   const people = await searchPeople(user.id, { query: q, tag, tier });
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-5">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1 className="text-3xl font-semibold">{t("title")}</h1>
         <Button
           render={<Link href="/people/new" />}
           nativeButton={false}
@@ -35,14 +36,16 @@ export default async function PeoplePage({
       <PeopleSearch />
 
       {people.length === 0 ? (
-        <p className="mt-4 text-muted-foreground">{t("empty")}</p>
+        <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center">
+          <p className="font-heading text-xl text-foreground">{t("empty")}</p>
+        </div>
       ) : (
-        <ul className="divide-y rounded-lg border">
+        <ul className="ql-stagger divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
           {people.map((person) => (
             <li key={person.id}>
               <Link
                 href={`/people/${person.id}`}
-                className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted"
+                className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-accent"
               >
                 <PersonAvatar
                   fullName={person.fullName}
@@ -54,13 +57,11 @@ export default async function PeoplePage({
                       {person.fullName}
                     </span>
                     {person.relationshipTier ? (
-                      <Badge variant="secondary" className="shrink-0">
-                        {t(`tier.${person.relationshipTier}`)}
-                      </Badge>
+                      <TierBadge tier={person.relationshipTier} label={t(`tier.${person.relationshipTier}`)} />
                     ) : null}
                   </div>
                   {person.tags.length > 0 ? (
-                    <div className="mt-1 flex flex-wrap gap-1">
+                    <div className="mt-1.5 flex flex-wrap gap-1">
                       {person.tags.map((tagName) => (
                         <Badge
                           key={tagName}

@@ -85,7 +85,7 @@ function BriefView({ brief }: { brief: Brief }) {
     <section
       role="region"
       aria-label={t("button")}
-      className="space-y-3 rounded-lg border bg-muted/30 px-3 py-3 text-sm"
+      className="space-y-4 rounded-2xl border border-border bg-card px-4 py-4 text-sm shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none"
     >
       {!hasContent ? (
         <p className="text-muted-foreground">{t("empty")}</p>
@@ -93,14 +93,14 @@ function BriefView({ brief }: { brief: Brief }) {
 
       {brief.summary ? (
         <div className="space-y-1">
-          <h3 className="font-medium">{t("summary")}</h3>
+          <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{t("summary")}</h3>
           <p>{brief.summary}</p>
         </div>
       ) : null}
 
       {brief.talkingPoints.length > 0 ? (
         <div className="space-y-1">
-          <h3 className="font-medium">{t("talkingPoints")}</h3>
+          <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{t("talkingPoints")}</h3>
           <ul className="list-disc space-y-0.5 pl-5">
             {brief.talkingPoints.map((point, i) => (
               <li key={i}>{point}</li>
@@ -111,7 +111,7 @@ function BriefView({ brief }: { brief: Brief }) {
 
       {brief.askAbout.length > 0 ? (
         <div className="space-y-1">
-          <h3 className="font-medium">{t("askAbout")}</h3>
+          <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{t("askAbout")}</h3>
           <ul className="list-disc space-y-0.5 pl-5">
             {brief.askAbout.map((item, i) => (
               <li key={i}>{item}</li>
@@ -122,7 +122,7 @@ function BriefView({ brief }: { brief: Brief }) {
 
       {brief.reconnectReason ? (
         <div className="space-y-1">
-          <h3 className="font-medium">{t("reconnectReason")}</h3>
+          <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">{t("reconnectReason")}</h3>
           <p>{brief.reconnectReason}</p>
         </div>
       ) : null}

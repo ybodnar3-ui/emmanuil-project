@@ -19,7 +19,7 @@ export default async function EditPersonPage({
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("form.editTitle")}</h1>
+      <h1 className="text-3xl font-semibold">{t("form.editTitle")}</h1>
       <PersonForm
         action={updatePersonAction.bind(null, person.id)}
         cancelHref={`/people/${person.id}`}

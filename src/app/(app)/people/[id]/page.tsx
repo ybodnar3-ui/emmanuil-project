@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PersonAvatar } from "../_components/person-avatar";
+import { TierBadge } from "../_components/tier-badge";
 import { FactForm } from "./_components/fact-form";
 import { DeleteFactButton } from "./_components/delete-fact-button";
 import { InteractionForm } from "./_components/interaction-form";
@@ -54,21 +55,22 @@ export default async function PersonCardPage({
       ) : null}
 
       {/* Header */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
         <PersonAvatar
           fullName={person.fullName}
           photoUrl={person.photoUrl}
-          className="size-14"
+          className="size-16 text-lg"
         />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="truncate text-2xl font-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="min-w-0 truncate text-3xl font-semibold">
               {person.fullName}
             </h1>
             {person.relationshipTier ? (
-              <Badge variant="secondary">
-                {t(`tier.${person.relationshipTier}`)}
-              </Badge>
+              <TierBadge
+                tier={person.relationshipTier}
+                label={t(`tier.${person.relationshipTier}`)}
+              />
             ) : null}
           </div>
           <p className="text-sm text-muted-foreground">
@@ -108,7 +110,9 @@ export default async function PersonCardPage({
       <BriefPanel personId={person.id} />
 
       {person.howWeMet ? (
-        <p className="text-sm whitespace-pre-line">{person.howWeMet}</p>
+        <p className="rounded-2xl border border-border bg-card px-5 py-4 text-sm leading-relaxed whitespace-pre-line shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
+          {person.howWeMet}
+        </p>
       ) : null}
 
       {/* Cadence */}
@@ -144,8 +148,8 @@ export default async function PersonCardPage({
           {FACT_CATEGORIES.map((category) => {
             const facts = factsByCategory[category]!;
             return (
-              <div key={category} className="space-y-1.5">
-                <h3 className="text-sm font-medium">
+              <div key={category} className="space-y-2">
+                <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
                   {t(`factCategory.${category}`)}
                 </h3>
                 {facts.length > 0 ? (
@@ -185,7 +189,10 @@ export default async function PersonCardPage({
           ) : (
             <ul className="space-y-3">
               {person.interactions.map((interaction) => (
-                <li key={interaction.id} className="border-l-2 pl-3 text-sm">
+                <li
+                  key={interaction.id}
+                  className="border-l-2 border-primary/30 pl-3 text-sm"
+                >
                   <div className="text-xs text-muted-foreground">
                     {fmtDate(interaction.date)}
                     {interaction.channel

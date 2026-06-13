@@ -49,7 +49,7 @@ export function AddTaskForm({
     <form
       ref={formRef}
       action={formAction}
-      className="space-y-3 rounded-xl border p-4"
+      className="space-y-3 rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none"
     >
       <div className="space-y-1.5">
         <Label htmlFor="task-title">{t("titleLabel")}</Label>

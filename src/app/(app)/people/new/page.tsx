@@ -10,7 +10,7 @@ export default async function NewPersonPage() {
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t("form.newTitle")}</h1>
+      <h1 className="text-3xl font-semibold">{t("form.newTitle")}</h1>
       <PersonForm action={createPersonAction} cancelHref="/people" />
     </section>
   );
