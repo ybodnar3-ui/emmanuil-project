@@ -4,7 +4,8 @@ import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
  * Webhook contract (mocked data layer + Bot API client):
  *  - missing/wrong X-Telegram-Bot-Api-Secret-Token → 401, no side effects
  *  - valid `/start <code>` → linkChatByCode(code, chatId) + a reply, 200
- *  - non-/start message → 200 no-op (no link, no reply)
+ *  - bare `/start` / non-/start message with a chat id → 200 + help reply
+ *  - update without a chat id → 200 no-op (no link, no reply)
  *  - no bot token configured (but valid secret) → 200 skipped no-op
  */
 
@@ -92,9 +93,35 @@ describe("telegram webhook behavior", () => {
     expect(sendTelegramMessage).toHaveBeenCalledTimes(1);
   });
 
-  it("is a 200 no-op for a non-/start message", async () => {
+  it("replies with help on a bare /start (no code), returning 200", async () => {
+    sendTelegramMessage.mockResolvedValue(true);
+    const res = await POST(
+      req({ message: { text: "/start", chat: { id: 42 } } }, SECRET),
+    );
+    expect(res.status).toBe(200);
+    expect(linkChatByCode).not.toHaveBeenCalled();
+    expect(sendTelegramMessage).toHaveBeenCalledTimes(1);
+    expect(sendTelegramMessage.mock.calls[0][0]).toBe("42");
+    const helpText = sendTelegramMessage.mock.calls[0][1] as string;
+    expect(typeof helpText).toBe("string");
+    expect(helpText.length).toBeGreaterThan(0);
+    expect(helpText).toContain("/settings");
+  });
+
+  it("replies with help on an unrecognized message, returning 200", async () => {
+    sendTelegramMessage.mockResolvedValue(true);
     const res = await POST(
       req({ message: { text: "hello there", chat: { id: 7 } } }, SECRET),
+    );
+    expect(res.status).toBe(200);
+    expect(linkChatByCode).not.toHaveBeenCalled();
+    expect(sendTelegramMessage).toHaveBeenCalledTimes(1);
+    expect(sendTelegramMessage.mock.calls[0][0]).toBe("7");
+  });
+
+  it("is a 200 no-op for an update with no chat id (no reply)", async () => {
+    const res = await POST(
+      req({ message: { text: "/start" } }, SECRET),
     );
     expect(res.status).toBe(200);
     expect(linkChatByCode).not.toHaveBeenCalled();

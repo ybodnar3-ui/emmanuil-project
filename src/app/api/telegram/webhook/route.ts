@@ -13,7 +13,9 @@ import { logError } from "@/server/log";
  *  - When no bot token is configured, returns 200 no-op (the route is harmless
  *    and present even before the bot exists).
  *  - Parses the update; on `/start <code>` it links the chat by code and replies
- *    connected/invalid. Everything else is a 200 no-op.
+ *    connected/invalid. Any other message that has a chat id (bare `/start`,
+ *    `/start` with no arg, or arbitrary text) gets a short help reply so the bot
+ *    is never silent. Updates without a chat id are a 200 no-op.
  *  - Always returns 200 quickly on the happy/parse paths (Telegram retries on
  *    non-200). Never throws to the caller; never logs or returns the bot token.
  *
@@ -51,8 +53,15 @@ export async function POST(request: Request): Promise<Response> {
         // Reply text is static (no user data), so no escaping needed here.
         const reply = linked
           ? "✅ Connected. You'll get your daily reminders here."
-          : "⚠️ That link code is invalid or already used. Open Settings in the app to get a fresh link.";
+          : "⚠️ That link looks invalid or expired — generate a fresh one in the app.";
         await sendTelegramMessage(String(chatId), reply);
+      } else {
+        // Bare `/start`, `/start` with no arg, or any other text: never stay
+        // silent — point the user at the linking flow. The origin is derived
+        // from the request so the URL stays correct across domains.
+        const origin = new URL(request.url).origin;
+        const help = `👋 To connect Emmanuil, open ${origin}/settings on the web app, tap "Connect Telegram", and follow the link there — it carries a one-time code that links this chat to your account.`;
+        await sendTelegramMessage(String(chatId), help);
       }
     }
   } catch (err) {
