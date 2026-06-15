@@ -9,6 +9,7 @@ import {
   answerQuestion,
 } from "@/server/ai/assistant";
 import { listRoster, applyProposal } from "@/server/data/proposals";
+import { transcribeAudio } from "@/server/stt/groq";
 import { logError } from "@/server/log";
 
 /**
@@ -111,4 +112,33 @@ export async function applyProposalAction(input: {
     logError("action.applyProposal", err, { userId: user.id });
     return { status: "error" };
   }
+}
+
+export type CaptureVoiceResult =
+  | { status: "ok"; text: string }
+  | { status: "error"; code: string };
+
+/**
+ * Auth-gated voice → transcript. Transcribes an uploaded audio blob server-side
+ * via Groq Whisper and returns the (editable) transcript text for the chat input.
+ *
+ * - `requireUser()` runs first: only authenticated users transcribe.
+ * - Audio is never persisted — the blob is transcribed and then dropped.
+ * - No-throw/no-leak: `transcribeAudio` returns stable codes; the Groq key and raw
+ *   provider error never reach the client. With no key it returns `NO_KEY` and the
+ *   UI degrades to text-only.
+ * - The transcript reuses the existing assistantSendAction/applyProposal pipeline
+ *   unchanged (confirm-before-persist stays).
+ */
+export async function captureVoiceAction(
+  formData: FormData,
+): Promise<CaptureVoiceResult> {
+  await requireUser(); // ensures only authed users transcribe
+  const audio = formData.get("audio");
+  if (!(audio instanceof Blob)) return { status: "error", code: "NO_AUDIO" };
+  const locale = await getLocaleFromCookie();
+  const r = await transcribeAudio(audio, locale);
+  return r.status === "ok"
+    ? { status: "ok", text: r.text }
+    : { status: "error", code: r.message };
 }
