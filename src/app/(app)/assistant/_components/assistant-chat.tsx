@@ -26,6 +26,15 @@ type Entry =
   | { id: number; role: "user"; text: string }
   | { id: number; role: "assistant"; result: AssistantResult };
 
+// Known voice error codes map to localized strings; anything else → generic.
+const VOICE_ERROR_CODES = [
+  "NO_KEY",
+  "TOO_LARGE",
+  "REQUEST_FAILED",
+  "EMPTY",
+  "NO_AUDIO",
+];
+
 export function AssistantChat() {
   const t = useTranslations("assistant");
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -57,15 +66,6 @@ export function AssistantChat() {
       setEntries((prev) => [...prev, { id: nextIdRef.current++, role: "assistant", result }]);
     });
   }
-
-  // Known voice error codes map to localized strings; anything else → generic.
-  const VOICE_ERROR_CODES = [
-    "NO_KEY",
-    "TOO_LARGE",
-    "REQUEST_FAILED",
-    "EMPTY",
-    "NO_AUDIO",
-  ];
 
   // A recorded clip transcribes server-side, then fills the (editable) input. The
   // user reviews/edits and sends via the existing path — audio is never persisted.

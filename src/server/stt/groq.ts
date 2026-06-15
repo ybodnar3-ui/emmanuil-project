@@ -33,9 +33,12 @@ export async function transcribeAudio(
   const key = process.env.GROQ_API_KEY;
   if (!key) return { status: "error", message: "NO_KEY" };
   if (file.size > MAX_AUDIO_BYTES) return { status: "error", message: "TOO_LARGE" };
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 25_000);
   try {
     const form = new FormData();
-    form.append("file", file, "audio.webm");
+    const filename = file.type.includes("mp4") ? "audio.mp4" : "audio.webm";
+    form.append("file", file, filename);
     form.append("model", MODEL);
     form.append("response_format", "json");
     const lang = locale === "uk" ? "uk" : "en";
@@ -44,6 +47,7 @@ export async function transcribeAudio(
       method: "POST",
       headers: { Authorization: `Bearer ${key}` },
       body: form,
+      signal: ctrl.signal,
     });
     if (!res.ok) {
       logError("stt.groq", new Error(`HTTP ${res.status}`));
@@ -56,5 +60,7 @@ export async function transcribeAudio(
   } catch (err) {
     logError("stt.groq", err);
     return { status: "error", message: "REQUEST_FAILED" };
+  } finally {
+    clearTimeout(t);
   }
 }

@@ -80,6 +80,7 @@ export function useAudioRecorder(): UseAudioRecorder {
 
   const start = useCallback(async () => {
     if (!isSupportedClient()) return;
+    if (recorderRef.current) return;
     setPermissionDenied(false);
     setError(false);
     let stream: MediaStream;

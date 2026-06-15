@@ -65,7 +65,9 @@ export function MicButton({
               ? t("voice.recording")
               : t("voice.start")
         }
-        aria-describedby={permissionDenied ? "voice-denied" : undefined}
+        aria-describedby={
+          permissionDenied ? "voice-denied" : error ? "voice-error" : undefined
+        }
         onClick={toggle}
         className={recording ? "motion-safe:animate-pulse" : undefined}
       >
@@ -76,7 +78,7 @@ export function MicButton({
           {t("voice.denied")}
         </p>
       ) : error ? (
-        <p role="status" className="text-xs text-destructive">
+        <p id="voice-error" role="alert" className="text-xs text-destructive">
           {t("voice.errors.generic")}
         </p>
       ) : null}
