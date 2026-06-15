@@ -6,7 +6,11 @@ import Link from "next/link";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { assistantSendAction, type AssistantResult } from "../actions";
+import {
+  assistantSendAction,
+  captureVoiceAction,
+  type AssistantResult,
+} from "../actions";
 import { ProposalCard, type Proposal } from "./proposal-card";
 import { MicButton } from "./mic-button";
 import { Markdown } from "./markdown";
@@ -27,6 +31,8 @@ export function AssistantChat() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [value, setValue] = useState("");
   const [pending, startTransition] = useTransition();
+  const [transcribing, setTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   // Per-mount key counter: stable across HMR/navigation, no module state.
   const nextIdRef = useRef(0);
@@ -38,7 +44,7 @@ export function AssistantChat() {
 
   function send() {
     const text = value.trim();
-    if (!text || pending) return;
+    if (!text || pending || transcribing) return;
     setEntries((prev) => [...prev, { id: nextIdRef.current++, role: "user", text }]);
     setValue("");
     startTransition(async () => {
@@ -51,6 +57,42 @@ export function AssistantChat() {
       setEntries((prev) => [...prev, { id: nextIdRef.current++, role: "assistant", result }]);
     });
   }
+
+  // Known voice error codes map to localized strings; anything else → generic.
+  const VOICE_ERROR_CODES = [
+    "NO_KEY",
+    "TOO_LARGE",
+    "REQUEST_FAILED",
+    "EMPTY",
+    "NO_AUDIO",
+  ];
+
+  // A recorded clip transcribes server-side, then fills the (editable) input. The
+  // user reviews/edits and sends via the existing path — audio is never persisted.
+  async function onRecorded(blob: Blob) {
+    if (transcribing || pending) return;
+    setVoiceError(null);
+    setTranscribing(true);
+    try {
+      const fd = new FormData();
+      fd.append("audio", blob, "audio.webm");
+      const r = await captureVoiceAction(fd);
+      if (r.status === "ok") {
+        setValue((prev) => (prev ? `${prev} ${r.text}` : r.text));
+      } else {
+        const key = VOICE_ERROR_CODES.includes(r.code)
+          ? `voice.errors.${r.code}`
+          : "voice.errors.generic";
+        setVoiceError(key);
+      }
+    } catch {
+      setVoiceError("voice.errors.generic");
+    } finally {
+      setTranscribing(false);
+    }
+  }
+
+  const busy = pending || transcribing;
 
   return (
     <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3">
@@ -80,7 +122,21 @@ export function AssistantChat() {
         {pending ? (
           <p className="text-sm text-muted-foreground">{t("thinking")}</p>
         ) : null}
+        {transcribing ? (
+          <p role="status" className="text-sm text-muted-foreground">
+            {t("voice.transcribing")}
+          </p>
+        ) : null}
       </div>
+
+      {voiceError ? (
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          {t(voiceError)}
+        </p>
+      ) : null}
 
       <form
         className="flex items-center gap-2"
@@ -89,15 +145,15 @@ export function AssistantChat() {
           send();
         }}
       >
-        <MicButton onTranscript={(text) => setValue(text)} />
+        <MicButton onRecorded={onRecorded} disabled={busy} />
         <Input
           aria-label={t("inputPlaceholder")}
           placeholder={t("inputPlaceholder")}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          disabled={pending}
+          disabled={busy}
         />
-        <Button type="submit" size="sm" disabled={pending || !value.trim()}>
+        <Button type="submit" size="sm" disabled={busy || !value.trim()}>
           <Send />
           {t("send")}
         </Button>

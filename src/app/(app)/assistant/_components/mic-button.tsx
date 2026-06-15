@@ -3,22 +3,27 @@
 import { useTranslations } from "next-intl";
 import { Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSpeechRecognition } from "./use-speech-recognition";
+import { useAudioRecorder } from "./use-audio-recorder";
 
 /**
- * Voice-input toggle. Where the Web Speech API is unsupported it renders a
- * disabled mic with a tooltip rather than disappearing entirely. While listening
- * it pushes the live transcript into the chat input via `onTranscript`, and the
- * listening indicator respects reduced-motion (the pulse is disabled there).
+ * Voice-capture toggle. Records audio with MediaRecorder and, on stop, hands the
+ * recorded Blob up via `onRecorded` (the parent transcribes it server-side via
+ * Groq). Where MediaRecorder/getUserMedia is unsupported it renders a disabled mic
+ * with a tooltip rather than disappearing. A denied mic surfaces an actionable,
+ * localized message. The recording pulse respects reduced-motion.
+ *
+ * `disabled` lets the parent lock the mic while a previous clip is transcribing.
  */
 export function MicButton({
-  onTranscript,
+  onRecorded,
+  disabled = false,
 }: {
-  onTranscript: (text: string) => void;
+  onRecorded: (blob: Blob) => void;
+  disabled?: boolean;
 }) {
   const t = useTranslations("assistant");
-  const { supported, listening, permissionDenied, start, stop } =
-    useSpeechRecognition(onTranscript);
+  const { supported, recording, permissionDenied, error, start, stop } =
+    useAudioRecorder();
 
   if (!supported) {
     return (
@@ -27,38 +32,52 @@ export function MicButton({
         variant="outline"
         size="icon-sm"
         disabled
-        title={t("voice.unsupported")}
-        aria-label={t("voice.unsupported")}
+        title={t("voice.notAvailable")}
+        aria-label={t("voice.notAvailable")}
       >
         <MicOff />
       </Button>
     );
   }
 
+  async function toggle() {
+    if (recording) {
+      const blob = await stop();
+      if (blob) onRecorded(blob);
+    } else {
+      await start();
+    }
+  }
+
   return (
     <>
       <Button
         type="button"
-        variant={listening ? "default" : "outline"}
+        variant={recording ? "default" : "outline"}
         size="icon-sm"
-        aria-pressed={listening}
-        aria-label={listening ? t("voice.stop") : t("voice.start")}
+        disabled={disabled}
+        aria-pressed={recording}
+        aria-label={recording ? t("voice.stop") : t("voice.start")}
         title={
           permissionDenied
             ? t("voice.denied")
-            : listening
-              ? t("voice.listening")
+            : recording
+              ? t("voice.recording")
               : t("voice.start")
         }
         aria-describedby={permissionDenied ? "voice-denied" : undefined}
-        onClick={() => (listening ? stop() : start())}
-        className={listening ? "motion-safe:animate-pulse" : undefined}
+        onClick={toggle}
+        className={recording ? "motion-safe:animate-pulse" : undefined}
       >
         <Mic />
       </Button>
       {permissionDenied ? (
         <p id="voice-denied" role="status" className="text-xs text-destructive">
           {t("voice.denied")}
+        </p>
+      ) : error ? (
+        <p role="status" className="text-xs text-destructive">
+          {t("voice.errors.generic")}
         </p>
       ) : null}
     </>

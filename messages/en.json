@@ -152,11 +152,20 @@
     },
     "clarify": { "createPerson": "Add a new person" },
     "voice": {
-      "start": "Start voice input",
-      "stop": "Stop voice input",
-      "unsupported": "Voice input isn't supported in this browser.",
-      "listening": "Listening…",
-      "denied": "Microphone access was denied. Allow it in your browser settings to use voice input."
+      "start": "Start recording",
+      "stop": "Stop recording",
+      "recording": "Recording…",
+      "transcribing": "Transcribing…",
+      "notAvailable": "Voice recording isn't available in this browser.",
+      "denied": "Microphone access was denied. Allow it in your browser settings to use voice input.",
+      "errors": {
+        "NO_KEY": "Voice transcription isn't set up yet. You can still type your note.",
+        "TOO_LARGE": "That recording is too long. Try a shorter note.",
+        "REQUEST_FAILED": "Couldn't transcribe the recording. Please try again.",
+        "EMPTY": "No speech was detected. Try recording again.",
+        "NO_AUDIO": "No audio was captured. Try recording again.",
+        "generic": "Something went wrong with the recording. Please try again."
+      }
     }
   },
   "settings": {
