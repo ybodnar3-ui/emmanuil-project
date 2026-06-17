@@ -21,6 +21,8 @@ const logInteraction = vi.fn();
 const setCadence = vi.fn();
 const clearCadence = vi.fn();
 const createTask = vi.fn();
+const addKeyDate = vi.fn();
+const deleteKeyDate = vi.fn();
 const logError = vi.fn();
 
 class RedirectError extends Error {}
@@ -54,6 +56,10 @@ vi.mock("@/server/data/facts", () => ({
   addFact: (...a: unknown[]) => addFact(...a),
   deleteFact: vi.fn(),
 }));
+vi.mock("@/server/data/keydates", () => ({
+  addKeyDate: (...a: unknown[]) => addKeyDate(...a),
+  deleteKeyDate: (...a: unknown[]) => deleteKeyDate(...a),
+}));
 vi.mock("@/server/data/interactions", () => ({
   logInteraction: (...a: unknown[]) => logInteraction(...a),
 }));
@@ -73,6 +79,7 @@ vi.mock("@/server/storage", () => ({
 import {
   createPersonAction,
   addFactAction,
+  addKeyDateAction,
   setCadenceAction,
   deletePersonAction,
   clearCadenceAction,
@@ -98,6 +105,8 @@ beforeEach(() => {
     setCadence,
     clearCadence,
     createTask,
+    addKeyDate,
+    deleteKeyDate,
     logError,
     redirect,
   ]) {
@@ -177,6 +186,51 @@ describe("addFactAction", () => {
     });
     expect(logError).toHaveBeenCalledWith(
       "action.addFact",
+      expect.any(Error),
+      { userId: "u1", personId: "p1" },
+    );
+  });
+});
+
+describe("addKeyDateAction", () => {
+  it("adds a key date with the bound personId on the happy path", async () => {
+    addKeyDate.mockResolvedValue({ id: "k1" });
+    const result = await addKeyDateAction("p1", { status: "idle" }, form({
+      label: "son's birthday",
+      date: "1990-03-03",
+    }));
+    expect(result).toEqual({ status: "ok" });
+    expect(addKeyDate).toHaveBeenCalledOnce();
+    const [userId, personId, input] = addKeyDate.mock.calls[0];
+    expect(userId).toBe("u1");
+    expect(personId).toBe("p1");
+    expect(input.label).toBe("son's birthday");
+    expect(input.date).toBeInstanceOf(Date);
+  });
+
+  it("returns bare field-error keys on invalid input without touching the data layer", async () => {
+    const result = await addKeyDateAction("p1", { status: "idle" }, form({
+      label: "",
+      date: "",
+    }));
+    expect(result.status).toBe("error");
+    if (result.status !== "error") return;
+    expect(result.fieldErrors?.label).toBe("errors.invalid");
+    expect(addKeyDate).not.toHaveBeenCalled();
+  });
+
+  it("returns notFound and logs when addKeyDate throws (person not owned)", async () => {
+    addKeyDate.mockRejectedValue(new Error("Person not found"));
+    const result = await addKeyDateAction("p1", { status: "idle" }, form({
+      label: "anniversary",
+      date: "2010-07-01",
+    }));
+    expect(result).toEqual({
+      status: "error",
+      message: "people.errors.notFound",
+    });
+    expect(logError).toHaveBeenCalledWith(
+      "action.addKeyDate",
       expect.any(Error),
       { userId: "u1", personId: "p1" },
     );

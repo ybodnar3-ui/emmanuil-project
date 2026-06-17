@@ -16,12 +16,16 @@
     "section": {
       "reconnect": "People to reconnect with",
       "birthdays": "Birthdays",
+      "dates": "Birthdays & dates",
       "followUps": "Follow-ups"
     },
     "overdue": "{days, plural, one {# day overdue} other {# days overdue}}",
     "dueToday": "Due today",
     "birthdayInDays": "{days, plural, one {Birthday in # day} other {Birthday in # days}}",
     "birthdayToday": "Birthday today",
+    "keyDate": "Wish {name} — {label} ({when})",
+    "keyDateToday": "today",
+    "keyDateInDays": "{days, plural, one {in # day} other {in # days}}",
     "done": "Done",
     "snooze": "Snooze",
     "snooze3d": "Snooze 3d",
@@ -84,6 +88,14 @@
       "content": "Fact",
       "category": "Category",
       "delete": "Delete fact"
+    },
+    "keyDates": {
+      "title": "Key dates",
+      "label": "Label (e.g. son's birthday)",
+      "dateLabel": "Date",
+      "add": "Add date",
+      "none": "No key dates yet.",
+      "delete": "Delete key date"
     },
     "factCategory": {
       "family": "Family",

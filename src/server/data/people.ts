@@ -53,6 +53,7 @@ export function getPerson(userId: string, personId: string) {
       facts: { orderBy: { createdAt: "desc" } },
       interactions: { orderBy: { date: "desc" } },
       cadence: true,
+      keyDates: { orderBy: { date: "asc" } },
     },
   });
 }

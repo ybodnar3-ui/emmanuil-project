@@ -13,7 +13,11 @@ export async function TodayFeed({ items }: { items: FeedItem[] }) {
   const t = await getTranslations("today");
 
   const contacts = items.filter((i) => i.type === "contact");
-  const birthdays = items.filter((i) => i.type === "birthday");
+  // Birthdays + key dates share one "Birthdays & dates" section; they're already
+  // interleaved by inDays in the assembled feed, so preserve that order here.
+  const dates = items.filter(
+    (i) => i.type === "birthday" || i.type === "keydate",
+  );
   const tasks = items.filter((i) => i.type === "task");
 
   return (
@@ -21,8 +25,8 @@ export async function TodayFeed({ items }: { items: FeedItem[] }) {
       {contacts.length > 0 ? (
         <FeedSection title={t("section.reconnect")} items={contacts} />
       ) : null}
-      {birthdays.length > 0 ? (
-        <FeedSection title={t("section.birthdays")} items={birthdays} />
+      {dates.length > 0 ? (
+        <FeedSection title={t("section.dates")} items={dates} />
       ) : null}
       {tasks.length > 0 ? (
         <FeedSection title={t("section.followUps")} items={tasks} />
@@ -50,5 +54,7 @@ function FeedSection({ title, items }: { title: string; items: FeedItem[] }) {
 
 function keyFor(item: FeedItem): string {
   if (item.type === "task") return `task-${item.taskId}`;
+  // A person can have multiple key dates, so disambiguate by label too.
+  if (item.type === "keydate") return `keydate-${item.personId}-${item.label}`;
   return `${item.type}-${item.personId}`;
 }

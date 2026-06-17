@@ -14,6 +14,8 @@ import {
 import { generateBrief, type BriefResult } from "@/server/ai/brief";
 import { getLocaleFromCookie } from "@/i18n/locale";
 import { addFact, deleteFact } from "@/server/data/facts";
+import { addKeyDate, deleteKeyDate } from "@/server/data/keydates";
+import { keyDateInputSchema } from "@/server/validation/keydate";
 import { logInteraction } from "@/server/data/interactions";
 import { setCadence, clearCadence } from "@/server/data/cadence";
 import { createTask } from "@/server/data/tasks";
@@ -187,6 +189,44 @@ export async function deleteFactAction(formData: FormData): Promise<void> {
   const factId = String(formData.get("factId") ?? "");
   const personId = String(formData.get("personId") ?? "");
   if (factId) await deleteFact(user.id, factId);
+  if (personId) revalidatePath(`/people/${personId}`);
+}
+
+export async function addKeyDateAction(
+  personId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const parsed = keyDateInputSchema.safeParse({
+    label: formData.get("label") ?? "",
+    date: formData.get("date") || undefined,
+  });
+  if (!parsed.success) {
+    return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
+  }
+  try {
+    await addKeyDate(user.id, personId, parsed.data);
+  } catch (err) {
+    logError("action.addKeyDate", err, { userId: user.id, personId });
+    return { status: "error", message: "people.errors.notFound" };
+  }
+  revalidatePath(`/people/${personId}`);
+  return { status: "ok" };
+}
+
+export async function deleteKeyDateAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const keyDateId = String(formData.get("keyDateId") ?? "");
+  const personId = String(formData.get("personId") ?? "");
+  if (keyDateId) {
+    try {
+      await deleteKeyDate(user.id, keyDateId);
+    } catch (err) {
+      // Idempotent: a stale/already-deleted id (or not-owned) is a no-op success.
+      logError("action.deleteKeyDate", err, { userId: user.id, keyDateId });
+    }
+  }
   if (personId) revalidatePath(`/people/${personId}`);
 }
 

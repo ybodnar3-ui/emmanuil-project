@@ -17,6 +17,7 @@ import { CadenceForm } from "./_components/cadence-form";
 import { ReminderForm } from "./_components/reminder-form";
 import { DeletePersonButton } from "./_components/delete-person-button";
 import { BriefPanel } from "./_components/brief-panel";
+import { KeyDates } from "./_components/key-dates";
 
 export default async function PersonCardPage({
   params,
@@ -181,6 +182,16 @@ export default async function PersonCardPage({
               </div>
             );
           })}
+        </CardContent>
+      </Card>
+
+      {/* Key dates — labeled dates (birthdays, anniversaries) that recur annually. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("keyDates.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <KeyDates personId={person.id} items={person.keyDates} />
         </CardContent>
       </Card>
 

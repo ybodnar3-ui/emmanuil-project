@@ -154,6 +154,18 @@ function subtitleFor(item: FeedItem, t: TFn): string {
       ? t("birthdayToday")
       : t("birthdayInDays", { days: item.inDays });
   }
+  if (item.type === "keydate") {
+    // Deterministic, localized greeting line (no AI): "Wish {name} — {label} ({when})".
+    const when =
+      item.inDays === 0
+        ? t("keyDateToday")
+        : t("keyDateInDays", { days: item.inDays });
+    return t("keyDate", {
+      name: item.personName,
+      label: item.label,
+      when,
+    });
+  }
   // contact or task — both carry overdueDays
   return item.overdueDays === 0
     ? t("dueToday")
