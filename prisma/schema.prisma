@@ -41,6 +41,7 @@ model Person {
   cadence          Cadence?
   tasks            Task[]
   chatMessages     ChatMessage[]
+  keyDates         KeyDate[]
 
   @@index([userId])
 }
@@ -51,6 +52,17 @@ model Fact {
   person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
   category  String // "family" | "work" | "projects" | "interests" | "ask-about"
   content   String
+  createdAt DateTime @default(now())
+
+  @@index([personId])
+}
+
+model KeyDate {
+  id        String   @id @default(cuid())
+  personId  String
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  label     String
+  date      DateTime
   createdAt DateTime @default(now())
 
   @@index([personId])
