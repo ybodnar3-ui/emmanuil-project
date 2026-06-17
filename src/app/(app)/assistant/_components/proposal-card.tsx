@@ -12,6 +12,7 @@ export type Proposal = {
   personName: string;
   facts: { category: string; content: string }[];
   interaction: { summary: string; channel?: string | null } | null;
+  keyDates: { label: string; date: string }[];
 };
 
 /**
@@ -24,6 +25,7 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
   const t = useTranslations("assistant");
   const tFact = useTranslations("people.factCategory");
   const tChannel = useTranslations("people.channel");
+  const tPeople = useTranslations("people");
   const [state, setState] = useState<"open" | "applied" | "dismissed" | "error">(
     "open",
   );
@@ -38,6 +40,7 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
           personId: proposal.personId,
           facts: proposal.facts,
           interaction: proposal.interaction,
+          keyDates: proposal.keyDates,
         });
         setState(res.status === "ok" ? "applied" : "error");
       } catch {
@@ -95,6 +98,19 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
           ) : null}
           {proposal.interaction.summary}
         </p>
+      ) : null}
+
+      {proposal.keyDates.length > 0 ? (
+        <ul className="list-disc space-y-0.5 pl-5">
+          {proposal.keyDates.map((k, i) => (
+            <li key={i}>
+              <span className="text-muted-foreground">
+                {tPeople("keyDates.title")}:
+              </span>{" "}
+              {k.label} · {k.date}
+            </li>
+          ))}
+        </ul>
       ) : null}
 
       {state === "error" ? (

@@ -50,15 +50,26 @@ describe("applyProposal ownership + persistence", () => {
       ...(data as object),
     }));
     const interactionCreate = vi.fn(async () => ({ id: "i1" }));
+    const keyDateCreate = vi.fn(async ({ data }: { data: unknown }) => ({
+      id: "k1",
+      ...(data as object),
+    }));
     const cadenceFindUnique = vi.fn();
     const cadenceUpdate = vi.fn(async () => ({ id: "c1" }));
     const tx = {
       fact: { create: factCreate },
       interaction: { create: interactionCreate },
+      keyDate: { create: keyDateCreate },
       cadence: { findUnique: cadenceFindUnique, update: cadenceUpdate },
     };
     transaction.mockImplementation(async (cb: (t: unknown) => unknown) => cb(tx));
-    return { factCreate, interactionCreate, cadenceFindUnique, cadenceUpdate };
+    return {
+      factCreate,
+      interactionCreate,
+      keyDateCreate,
+      cadenceFindUnique,
+      cadenceUpdate,
+    };
   }
 
   it("asserts ownership BEFORE creating, and creates facts with the resolved personId", async () => {
@@ -130,6 +141,62 @@ describe("applyProposal ownership + persistence", () => {
 
     expect(interactionCreate).toHaveBeenCalledOnce();
     expect(cadenceUpdate).not.toHaveBeenCalled();
+  });
+
+  it("creates a valid key date (ownership asserted first) coercing the ISO date", async () => {
+    personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
+    const { keyDateCreate, factCreate } = txClient();
+
+    await applyProposal("u1", "p1", {
+      facts: [],
+      interaction: null,
+      keyDates: [{ label: "son's birthday", date: "2026-03-03" }],
+    });
+
+    // Ownership is asserted before the write.
+    expect(personFindFirst.mock.invocationCallOrder[0]).toBeLessThan(
+      transaction.mock.invocationCallOrder[0],
+    );
+    expect(factCreate).not.toHaveBeenCalled();
+    expect(keyDateCreate).toHaveBeenCalledOnce();
+    const data = keyDateCreate.mock.calls[0]![0].data;
+    expect(data.personId).toBe("p1");
+    expect(data.label).toBe("son's birthday");
+    expect(data.date).toBeInstanceOf(Date);
+    expect(data.date.toISOString()).toBe("2026-03-03T00:00:00.000Z");
+  });
+
+  it("skips an invalid key date without throwing (still creates the valid one)", async () => {
+    personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
+    const { keyDateCreate } = txClient();
+
+    await applyProposal("u1", "p1", {
+      facts: [],
+      interaction: null,
+      keyDates: [
+        { label: "bad", date: "not-a-date" },
+        { label: "anniversary", date: "2010-07-01" },
+      ],
+    });
+
+    // The unparseable date is dropped; only the valid one is persisted.
+    expect(keyDateCreate).toHaveBeenCalledOnce();
+    expect(keyDateCreate.mock.calls[0]![0].data.label).toBe("anniversary");
+  });
+
+  it("rejects a proposal whose only key date is invalid (empty after validation)", async () => {
+    personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
+    const { keyDateCreate } = txClient();
+
+    await expect(
+      applyProposal("u1", "p1", {
+        facts: [],
+        interaction: null,
+        keyDates: [{ label: "bad", date: "not-a-date" }],
+      }),
+    ).rejects.toThrow();
+    expect(transaction).not.toHaveBeenCalled();
+    expect(keyDateCreate).not.toHaveBeenCalled();
   });
 
   it("rejects an empty proposal before opening a transaction", async () => {

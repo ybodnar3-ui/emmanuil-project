@@ -5,6 +5,7 @@ import {
   factInputSchema,
   interactionInputSchema,
 } from "@/server/validation/person";
+import { keyDateInputSchema } from "@/server/validation/keydate";
 
 /**
  * The assistant's confirm-before-persist write path. The conversational layer
@@ -25,12 +26,18 @@ export function listRoster(userId: string) {
 export type ProposalInput = {
   facts: { category: string; content: string }[];
   interaction?: { summary: string; channel?: string | null } | null;
+  // Assistant-extracted labeled dates. `date` is an untrusted ISO string; each is
+  // re-validated server-side via keyDateInputSchema and a bad/unparseable date is
+  // skipped (never persisted), not thrown.
+  keyDates?: { label: string; date: string }[];
 };
 
 /**
  * Persist a confirmed proposal: assert ownership, validate every item through
  * the Phase 3 zod schemas (never trust the client-sent shape), then create the
- * facts and (if present) the interaction in a single transaction. When an
+ * facts, any valid key dates, and (if present) the interaction in a single
+ * transaction. Invalid proposed key dates are skipped (re-validated, not trusted).
+ * When an
  * interaction is logged we reuse the cadence-bump logic from `logInteraction`
  * (lastContactedAt := date, nextDueAt := computeNextDueAt) rather than
  * duplicating the cadence math. Rejects an empty proposal.
@@ -53,7 +60,15 @@ export async function applyProposal(
           channel: input.interaction.channel ?? null,
         });
 
-  if (facts.length === 0 && interaction == null) {
+  // Key dates carry a client/AI-supplied ISO date string: re-validate (coerce) each
+  // and SKIP invalid ones (don't throw) so one malformed date can't sink the whole
+  // confirmed proposal. Never trust the client-sent shape.
+  const keyDates = (input.keyDates ?? []).flatMap((k) => {
+    const parsed = keyDateInputSchema.safeParse({ label: k.label, date: k.date });
+    return parsed.success ? [parsed.data] : [];
+  });
+
+  if (facts.length === 0 && interaction == null && keyDates.length === 0) {
     throw new Error("Empty proposal");
   }
 
@@ -66,6 +81,15 @@ export async function applyProposal(
       createdFacts.push(
         await tx.fact.create({
           data: { personId, category: f.category, content: f.content },
+        }),
+      );
+    }
+
+    const createdKeyDates = [];
+    for (const k of keyDates) {
+      createdKeyDates.push(
+        await tx.keyDate.create({
+          data: { personId, label: k.label, date: k.date },
         }),
       );
     }
@@ -95,6 +119,10 @@ export async function applyProposal(
       }
     }
 
-    return { facts: createdFacts, interaction: createdInteraction };
+    return {
+      facts: createdFacts,
+      interaction: createdInteraction,
+      keyDates: createdKeyDates,
+    };
   });
 }

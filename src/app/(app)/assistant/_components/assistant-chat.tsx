@@ -216,6 +216,7 @@ function AssistantEntry({ result }: { result: AssistantResult }) {
         personName: result.personName,
         facts: result.facts,
         interaction: result.interaction,
+        keyDates: result.keyDates,
       };
       return <ProposalCard proposal={proposal} />;
     }

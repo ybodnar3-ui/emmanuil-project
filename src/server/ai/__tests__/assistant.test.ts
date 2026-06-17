@@ -108,6 +108,31 @@ describe("interpretMessage (mocked client)", () => {
     expect(result).toEqual({ status: "ok", interpretation });
   });
 
+  it("capture: returns extracted proposedKeyDates intact", async () => {
+    const interpretation = {
+      intent: "capture",
+      personId: "p1",
+      mentionedName: "Maria",
+      question: null,
+      proposedFacts: [],
+      proposedInteraction: null,
+      proposedKeyDates: [{ label: "son's birthday", date: "2026-03-03" }],
+      reply: "Want me to save that date?",
+    };
+    parse.mockResolvedValue({ parsed_output: interpretation });
+
+    const result = await interpretMessage(
+      roster(),
+      "her son's birthday is March 3",
+      "en",
+    );
+
+    expect(result).toEqual({ status: "ok", interpretation });
+    // The system prompt instructs key-date extraction.
+    const args = parse.mock.calls[0]![0];
+    expect(args.system).toContain("proposedKeyDates");
+  });
+
   it("clarify: returns an unresolved (personId=null) interpretation intact", async () => {
     const interpretation = {
       intent: "clarify",

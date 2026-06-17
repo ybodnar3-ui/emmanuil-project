@@ -32,6 +32,7 @@ export type AssistantResult =
       personName: string;
       facts: { category: string; content: string }[];
       interaction: { summary: string; channel?: string | null } | null;
+      keyDates: { label: string; date: string }[];
       reply: string;
     }
   | { kind: "clarify"; reply: string; mentionedName: string | null }
@@ -64,7 +65,9 @@ export async function assistantSendAction(
   if (
     i.intent === "capture" &&
     i.personId &&
-    (i.proposedFacts.length || i.proposedInteraction)
+    (i.proposedFacts.length ||
+      i.proposedInteraction ||
+      i.proposedKeyDates.length)
   ) {
     const person = await getPerson(user.id, i.personId); // ownership-scoped
     if (!person) return { kind: "chat", reply: i.reply };
@@ -74,6 +77,7 @@ export async function assistantSendAction(
       personName: person.fullName,
       facts: i.proposedFacts,
       interaction: i.proposedInteraction ?? null,
+      keyDates: i.proposedKeyDates,
       reply: i.reply,
     };
   }
@@ -99,12 +103,14 @@ export async function applyProposalAction(input: {
   personId: string;
   facts: { category: string; content: string }[];
   interaction: { summary: string; channel?: string | null } | null;
+  keyDates?: { label: string; date: string }[];
 }): Promise<ApplyProposalResult> {
   const user = await requireUser();
   try {
     await applyProposal(user.id, input.personId, {
       facts: input.facts,
       interaction: input.interaction,
+      keyDates: input.keyDates,
     });
     revalidatePath(`/people/${input.personId}`);
     return { status: "ok" };

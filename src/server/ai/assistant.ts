@@ -31,6 +31,17 @@ export const interpretationSchema = z.object({
     })
     .nullable()
     .default(null),
+  // Labeled dates extracted from the message (family birthdays, anniversaries).
+  // `date` is an ISO date string; if the year is unknown the model uses the current
+  // year (recurrence ignores the year). Invalid dates are dropped on apply, not here.
+  proposedKeyDates: z
+    .array(
+      z.object({
+        label: z.string(),
+        date: z.string(),
+      }),
+    )
+    .default([]),
   reply: z.string(), // short natural-language message to show the user
 });
 export type Interpretation = z.infer<typeof interpretationSchema>;
@@ -85,7 +96,13 @@ const INTERPRET_SYSTEM = [
   "but you cannot resolve which), or 'chat' (anything else).",
   "Resolve any referenced person to an id from the provided roster, else personId=null.",
   "For 'capture', extract proposedFacts and/or a proposedInteraction ONLY from what the user",
-  "stated — never invent. Always include a short 'reply'. Write reply in the requested locale.",
+  "stated — never invent.",
+  "Also extract proposedKeyDates for any labeled calendar date the user mentions (a family",
+  "member's birthday, an anniversary, etc.). Each is { label, date } where date is an ISO",
+  "string YYYY-MM-DD. Example: \"his son's birthday is March 3\" →",
+  "{ label: \"son's birthday\", date: \"<current-year>-03-03\" }. If the year is unknown, use the",
+  "current year — recurrence ignores the year. Never invent dates the user didn't state.",
+  "Always include a short 'reply'. Write reply in the requested locale.",
 ].join(" ");
 
 /**
