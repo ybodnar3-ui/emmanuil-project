@@ -1,6 +1,7 @@
 import { prisma } from "@/server/db";
 import { listOpenTasksDue } from "@/server/data/tasks";
 import { getOrCreateReminderPrompt } from "@/server/data/reminders";
+import { getUpcomingKeyDates } from "@/server/data/keydates";
 import { endOfUtcDay, daysUntilBirthday } from "@/server/today/dates";
 import {
   assembleTodayFeed,
@@ -41,6 +42,9 @@ async function mapInBatches<T, R>(
  * - birthdays: this user's people with a birthday, filtered IN MEMORY to those
  *   within `birthdayWindowDays` (the next-occurrence math is pure + UTC, so it
  *   can't be expressed as a simple SQL range across the year boundary).
+ * - keyDates: this user's per-person key dates whose next annual occurrence is
+ *   within `birthdayWindowDays` (filtered in memory by the data layer, same UTC
+ *   month/day math as birthdays).
  * - tasks: open tasks due on/before today.
  */
 export async function getTodayData(
@@ -49,7 +53,8 @@ export async function getTodayData(
   locale: string,
   birthdayWindowDays = 7,
 ): Promise<FeedSources> {
-  const [dueCadences, peopleWithBirthday, dueTasks] = await Promise.all([
+  const [dueCadences, peopleWithBirthday, keyDates, dueTasks] =
+    await Promise.all([
     prisma.cadence.findMany({
       where: {
         nextDueAt: { lte: endOfUtcDay(now) },
@@ -66,6 +71,9 @@ export async function getTodayData(
       where: { userId, birthday: { not: null } },
       select: { id: true, fullName: true, birthday: true },
     }),
+    // Key dates recur annually by month/day, windowed to match birthdays. Already
+    // ownership-scoped (person: { userId }) and sorted soonest-first by the data layer.
+    getUpcomingKeyDates(userId, now, birthdayWindowDays),
     listOpenTasksDue(userId, now),
   ]);
 
@@ -113,7 +121,7 @@ export async function getTodayData(
     dueAt: t.dueAt,
   }));
 
-  return { contacts, birthdays, tasks };
+  return { contacts, birthdays, keyDates, tasks };
 }
 
 /**

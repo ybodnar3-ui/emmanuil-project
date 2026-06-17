@@ -7,6 +7,7 @@ function sources(overrides: Partial<FeedSources> = {}): FeedSources {
   return {
     contacts: [],
     birthdays: [],
+    keyDates: [],
     tasks: [],
     ...overrides,
   };
@@ -79,6 +80,68 @@ describe("assembleTodayFeed", () => {
       personName: "Bob",
       inDays: 3,
     });
+  });
+
+  it("maps a key date with inDays", () => {
+    const feed = assembleTodayFeed(
+      sources({
+        keyDates: [
+          {
+            id: "k1",
+            personId: "p2",
+            personName: "Bob",
+            label: "son's birthday",
+            date: new Date("1990-06-15T00:00:00.000Z"),
+            inDays: 3,
+          },
+        ],
+      }),
+      now,
+    );
+    expect(feed[0]).toMatchObject({
+      type: "keydate",
+      personId: "p2",
+      personName: "Bob",
+      label: "son's birthday",
+      inDays: 3,
+    });
+  });
+
+  it("interleaves key dates with birthdays by inDays (birthday before keydate at the same day)", () => {
+    const feed = assembleTodayFeed(
+      sources({
+        birthdays: [
+          {
+            personId: "b-3",
+            personName: "Zed",
+            birthday: new Date("1990-06-15T00:00:00.000Z"), // in 3 days
+          },
+        ],
+        keyDates: [
+          {
+            id: "k-1",
+            personId: "k-1p",
+            personName: "Amy",
+            label: "anniversary",
+            date: new Date("2000-06-13T00:00:00.000Z"), // in 1 day
+            inDays: 1,
+          },
+          {
+            id: "k-3",
+            personId: "b-3", // same day as the birthday (3) — birthday wins the tie
+            personName: "Zed",
+            label: "wedding",
+            date: new Date("2000-06-15T00:00:00.000Z"),
+            inDays: 3,
+          },
+        ],
+      }),
+      now,
+    );
+    const kinds = feed.map((i) =>
+      i.type === "keydate" ? `kd:${i.label}` : `bd:${i.personName}`,
+    );
+    expect(kinds).toEqual(["kd:anniversary", "bd:Zed", "kd:wedding"]);
   });
 
   it("maps a task with overdueDays", () => {

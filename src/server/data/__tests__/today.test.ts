@@ -13,6 +13,7 @@ const cadenceFindMany = vi.fn();
 const personFindMany = vi.fn();
 const taskFindMany = vi.fn();
 const getOrCreateReminderPrompt = vi.fn();
+const getUpcomingKeyDates = vi.fn();
 
 vi.mock("@/server/db", () => ({
   prisma: {
@@ -26,6 +27,11 @@ vi.mock("@/server/db", () => ({
 vi.mock("@/server/data/reminders", () => ({
   getOrCreateReminderPrompt: (...a: unknown[]) => getOrCreateReminderPrompt(...a),
 }));
+// Key dates have their own ownership-scoped data-layer fn (tested separately);
+// mock it so the read layer is tested in isolation.
+vi.mock("@/server/data/keydates", () => ({
+  getUpcomingKeyDates: (...a: unknown[]) => getUpcomingKeyDates(...a),
+}));
 
 import { getTodayData, getTodayFeed } from "@/server/data/today";
 import { endOfUtcDay } from "@/server/today/dates";
@@ -33,13 +39,20 @@ import { endOfUtcDay } from "@/server/today/dates";
 const now = new Date("2026-06-12T10:00:00.000Z");
 
 beforeEach(() => {
-  for (const fn of [cadenceFindMany, personFindMany, taskFindMany, getOrCreateReminderPrompt]) {
+  for (const fn of [
+    cadenceFindMany,
+    personFindMany,
+    taskFindMany,
+    getOrCreateReminderPrompt,
+    getUpcomingKeyDates,
+  ]) {
     fn.mockReset();
   }
   cadenceFindMany.mockResolvedValue([]);
   personFindMany.mockResolvedValue([]);
   taskFindMany.mockResolvedValue([]);
   getOrCreateReminderPrompt.mockResolvedValue("Ask how the move went.");
+  getUpcomingKeyDates.mockResolvedValue([]);
 });
 
 describe("getTodayData scoping", () => {
@@ -74,6 +87,26 @@ describe("getTodayData scoping", () => {
     ]);
     const data = await getTodayData("u1", now, "en");
     expect(data.birthdays.map((b) => b.personId)).toEqual(["p-soon"]);
+  });
+
+  it("fetches upcoming key dates scoped to the user within the window", async () => {
+    await getTodayData("u1", now, "en");
+    expect(getUpcomingKeyDates).toHaveBeenCalledWith("u1", now, 7);
+  });
+
+  it("includes the fetched key dates in the sources", async () => {
+    getUpcomingKeyDates.mockResolvedValue([
+      {
+        id: "k1",
+        personId: "p9",
+        personName: "Maria",
+        label: "son's birthday",
+        date: new Date("1990-06-15T00:00:00.000Z"),
+        inDays: 3,
+      },
+    ]);
+    const data = await getTodayData("u1", now, "en");
+    expect(data.keyDates.map((k) => k.id)).toEqual(["k1"]);
   });
 
   it("bakes the personalized prompt into each due contact (locale flows through)", async () => {
@@ -117,12 +150,28 @@ describe("getTodayFeed", () => {
       },
     ]);
 
+    getUpcomingKeyDates.mockResolvedValue([
+      {
+        id: "k-soon",
+        personId: "p-kd",
+        personName: "KdPerson",
+        label: "anniversary",
+        date: new Date("1990-06-15T00:00:00.000Z"),
+        inDays: 3,
+      },
+    ]);
+
     const feed = await getTodayFeed("u1", now, "en");
-    const ids = feed.map((i) =>
-      i.type === "task" ? i.taskId : i.personId,
-    );
-    // Most-overdue contact, then overdue task, then today's birthday.
-    expect(ids).toEqual(["c-old", "t1", "b-today"]);
+    const ids = feed.map((i) => (i.type === "task" ? i.taskId : i.personId));
+    // Most-overdue contact, then overdue task, then today's birthday, then the
+    // upcoming key date (in 3 days).
+    expect(ids).toEqual(["c-old", "t1", "b-today", "p-kd"]);
+    expect(feed.find((i) => i.type === "keydate")).toMatchObject({
+      type: "keydate",
+      personId: "p-kd",
+      label: "anniversary",
+      inDays: 3,
+    });
     expect(feed[0]).toMatchObject({
       type: "contact",
       overdueDays: 7,

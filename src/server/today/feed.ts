@@ -1,4 +1,5 @@
 import { startOfUtcDay, daysUntilBirthday, MS_PER_DAY } from "./dates";
+import type { UpcomingKeyDate } from "@/server/data/keydates";
 
 /**
  * One actionable row in the Today feed. The three sources (cadence-due contacts,
@@ -24,6 +25,14 @@ export type FeedItem =
       inDays: number;
     }
   | {
+      type: "keydate";
+      personId: string;
+      personName: string;
+      label: string;
+      date: Date;
+      inDays: number;
+    }
+  | {
       type: "task";
       taskId: string;
       title: string;
@@ -43,6 +52,9 @@ export type FeedSources = {
     prompt: string;
   }[];
   birthdays: { personId: string; personName: string; birthday: Date }[];
+  // Already-scoped + windowed by the data layer (getUpcomingKeyDates); each row
+  // carries its own inDays (next annual occurrence by month/day).
+  keyDates: UpcomingKeyDate[];
   tasks: {
     taskId: string;
     title: string;
@@ -66,12 +78,13 @@ function overdueDays(dueAt: Date, now: Date): number {
  * and tasks (the "act now" items) sort before birthdays, then by name/title so
  * the order is stable across reads.
  *
- *   contact / task → rank = -overdueDays (0 when due today)
- *   birthday       → rank = inDays (0 today, positive upcoming)
+ *   contact / task    → rank = -overdueDays (0 when due today)
+ *   birthday / keydate → rank = inDays (0 today, positive upcoming)
  *
  * Result: most-overdue contacts/tasks, then today's items (due contacts/tasks
- * at rank 0 ahead of today's birthdays via the type tie-break), then upcoming
- * birthdays in ascending day order.
+ * at rank 0 ahead of today's birthdays/key dates via the type tie-break), then
+ * upcoming birthdays + key dates interleaved in ascending day order (a birthday
+ * sorts before a key date at the same day via the stable label tie-break).
  */
 export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
   const items: { item: FeedItem; rank: number }[] = [];
@@ -122,9 +135,25 @@ export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
     });
   }
 
-  // Tie-break order: contacts/tasks before birthdays at the same rank, then by
-  // a stable label so equal-rank rows don't reorder between reads.
-  const typeWeight = (i: FeedItem) => (i.type === "birthday" ? 1 : 0);
+  for (const k of sources.keyDates) {
+    items.push({
+      rank: k.inDays,
+      item: {
+        type: "keydate",
+        personId: k.personId,
+        personName: k.personName,
+        label: k.label,
+        date: k.date,
+        inDays: k.inDays,
+      },
+    });
+  }
+
+  // Tie-break order: contacts/tasks (the "act now" items) before birthdays/key
+  // dates at the same rank, then by a stable label so equal-rank rows don't
+  // reorder between reads.
+  const typeWeight = (i: FeedItem) =>
+    i.type === "birthday" || i.type === "keydate" ? 1 : 0;
   const label = (i: FeedItem) =>
     i.type === "task" ? i.title : i.personName;
 
