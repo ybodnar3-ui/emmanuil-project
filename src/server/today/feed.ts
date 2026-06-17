@@ -13,6 +13,8 @@ export type FeedItem =
       reason: "cadence";
       dueAt: Date;
       overdueDays: number;
+      // Personalized "what to ask", baked in per cadence cycle (see reminders.ts).
+      prompt: string;
     }
   | {
       type: "birthday";
@@ -38,6 +40,7 @@ export type FeedSources = {
     personName: string;
     nextDueAt: Date;
     intervalDays: number;
+    prompt: string;
   }[];
   birthdays: { personId: string; personName: string; birthday: Date }[];
   tasks: {
@@ -84,6 +87,7 @@ export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
         reason: "cadence",
         dueAt: c.nextDueAt,
         overdueDays: od,
+        prompt: c.prompt,
       },
     });
   }
