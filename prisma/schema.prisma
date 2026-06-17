@@ -69,12 +69,17 @@ model Interaction {
 }
 
 model Cadence {
-  id              String    @id @default(cuid())
-  personId        String    @unique
-  person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
-  intervalDays    Int
-  lastContactedAt DateTime?
-  nextDueAt       DateTime
+  id               String    @id @default(cuid())
+  personId         String    @unique
+  person           Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  intervalDays     Int
+  lastContactedAt  DateTime?
+  nextDueAt        DateTime
+  // Personalized "what to ask" reminder, generated once per cadence cycle and
+  // cached here. Regenerated when reminderPromptAt is null or predates
+  // lastContactedAt (a new cycle). Nullable: a cadence may not have one yet.
+  reminderPrompt   String?
+  reminderPromptAt DateTime?
 }
 
 model Task {
