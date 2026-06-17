@@ -14,17 +14,32 @@ import type { FeedItem } from "@/server/today/feed";
 const EN: ReminderLabels = {
   header: "Your day with people",
   contacts: "Reach out",
-  birthdays: "Birthdays",
+  birthdays: "Birthdays & dates",
   tasks: "Tasks",
+  keyDate: "Wish {name} — {label} ({when})",
+  keyDateToday: "today",
+  keyDateInDays: "in {n} days",
   more: "+{n} more",
 };
 
 const UK: ReminderLabels = {
   header: "Ваш день із людьми",
   contacts: "Зв'язатися",
-  birthdays: "Дні народження",
+  birthdays: "Дні народження та дати",
   tasks: "Завдання",
+  keyDate: "Привітайте {name} — {label} ({when})",
+  keyDateToday: "сьогодні",
+  keyDateInDays: "через {n} дн.",
   more: "+ще {n}",
+};
+
+const keyDate: FeedItem = {
+  type: "keydate",
+  personId: "p3",
+  personName: "Maria",
+  label: "son's birthday",
+  date: new Date("2000-06-15T00:00:00.000Z"),
+  inDays: 3,
 };
 
 const contact: FeedItem = {
@@ -144,6 +159,40 @@ describe("formatReminderMessage", () => {
   it("does not append +N more when everything fits", () => {
     const out = formatReminderMessage([contact, birthday, task], EN) as string;
     expect(out).not.toMatch(/\+\d+ more/);
+  });
+
+  it("renders a key date with its deterministic greeting line (in N days)", () => {
+    const out = formatReminderMessage([keyDate], EN) as string;
+    // Section header + greeting are HTML-escaped (parse_mode HTML): "&" → "&amp;",
+    // "'" → "&#39;".
+    expect(out).toContain("Birthdays &amp; dates");
+    expect(out).toContain("Wish Maria — son&#39;s birthday (in 3 days)");
+  });
+
+  it("renders a key date as 'today' when inDays is 0", () => {
+    const out = formatReminderMessage(
+      [{ ...keyDate, inDays: 0 }],
+      EN,
+    ) as string;
+    expect(out).toContain("Wish Maria — son&#39;s birthday (today)");
+  });
+
+  it("HTML-escapes the key date's name and label so markup can't be injected", () => {
+    const evil: FeedItem = {
+      ...keyDate,
+      personName: "<i>x</i>",
+      label: "son & <b>heir</b>",
+    };
+    const out = formatReminderMessage([evil], EN) as string;
+    expect(out).not.toContain("<i>x</i>");
+    expect(out).not.toContain("<b>heir</b>");
+    expect(out).toContain("&lt;i&gt;x&lt;/i&gt;");
+    expect(out).toContain("son &amp; &lt;b&gt;heir&lt;/b&gt;");
+  });
+
+  it("renders the localized UK key date greeting", () => {
+    const out = formatReminderMessage([keyDate], UK) as string;
+    expect(out).toContain("Привітайте Maria — son&#39;s birthday (через 3 дн.)");
   });
 
   it("renders a task linked to a person with the escaped person name", () => {

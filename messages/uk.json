@@ -226,8 +226,11 @@
   "reminder": {
     "header": "Ваш день із людьми",
     "contacts": "Кому варто написати",
-    "birthdays": "Найближчі дні народження",
+    "birthdays": "Дні народження та дати",
     "tasks": "Завдання",
+    "keyDate": "Привітайте {name} — {label} ({when})",
+    "keyDateToday": "сьогодні",
+    "keyDateInDays": "через {n} дн.",
     "nothing": "На сьогодні нічого немає.",
     "more": "+ще {n}"
   }

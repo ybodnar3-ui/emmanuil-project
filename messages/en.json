@@ -226,8 +226,11 @@
   "reminder": {
     "header": "Your day with people",
     "contacts": "People to reach out to",
-    "birthdays": "Upcoming birthdays",
+    "birthdays": "Birthdays & dates",
     "tasks": "Tasks",
+    "keyDate": "Wish {name} — {label} ({when})",
+    "keyDateToday": "today",
+    "keyDateInDays": "in {n} days",
     "nothing": "Nothing for today.",
     "more": "+{n} more"
   }

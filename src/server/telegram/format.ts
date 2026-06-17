@@ -8,8 +8,19 @@ import type { FeedItem } from "@/server/today/feed";
 export type ReminderLabels = {
   header: string;
   contacts: string;
+  /** Header for the combined birthdays + key dates section ("Birthdays & dates"). */
   birthdays: string;
   tasks: string;
+  /** Greeting template for a key date, with `{name}` / `{label}` / `{when}`
+   *  placeholders (resolved here). `{when}` is filled from keyDateToday /
+   *  keyDateInDays. */
+  keyDate: string;
+  /** `{when}` when the key date is today. */
+  keyDateToday: string;
+  /** `{when}` template for an upcoming key date, with a literal `{n}` placeholder
+   *  for the day count (resolved here) — kept plural-free for the pure formatter,
+   *  same approach as `more`. */
+  keyDateInDays: string;
   /** "+N more" line appended when items are dropped to stay under the length cap.
    *  Caller passes a localized template with an `{n}` placeholder (resolved here). */
   more: string;
@@ -53,7 +64,11 @@ export function formatReminderMessage(
   if (feed.length === 0) return null;
 
   const contacts = feed.filter((i) => i.type === "contact");
-  const birthdays = feed.filter((i) => i.type === "birthday");
+  // Birthdays + key dates share the "Birthdays & dates" section, in feed order
+  // (already interleaved by inDays by the assembler).
+  const dates = feed.filter(
+    (i) => i.type === "birthday" || i.type === "keydate",
+  );
   const tasks = feed.filter((i) => i.type === "task");
 
   const lines: string[] = [`<b>${escapeHtml(labels.header)}</b>`];
@@ -88,10 +103,24 @@ export function formatReminderMessage(
     }
   }
 
-  if (birthdays.length > 0) {
+  if (dates.length > 0) {
     lines.push("", `<b>${escapeHtml(labels.birthdays)}</b>`);
-    for (const b of birthdays) {
-      if (!tryAdd([`• ${escapeHtml(b.personName)}`])) dropped++;
+    for (const d of dates) {
+      if (d.type === "keydate") {
+        // Deterministic, localized greeting line (no AI). Escape every interpolated
+        // user value (name, label) — the message is sent as parse_mode HTML.
+        const when =
+          d.inDays === 0
+            ? labels.keyDateToday
+            : labels.keyDateInDays.replace("{n}", String(d.inDays));
+        const greeting = labels.keyDate
+          .replace("{name}", escapeHtml(d.personName))
+          .replace("{label}", escapeHtml(d.label))
+          .replace("{when}", escapeHtml(when));
+        if (!tryAdd([`• ${greeting}`])) dropped++;
+      } else {
+        if (!tryAdd([`• ${escapeHtml(d.personName)}`])) dropped++;
+      }
     }
   }
 

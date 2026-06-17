@@ -66,6 +66,15 @@ export async function GET(request: Request): Promise<Response> {
           contacts: t("contacts"),
           birthdays: t("birthdays"),
           tasks: t("tasks"),
+          // Pass templates with literal placeholders; format.ts fills them per item
+          // (kept plural-free there, like `more`).
+          keyDate: t("keyDate", {
+            name: "{name}",
+            label: "{label}",
+            when: "{when}",
+          }),
+          keyDateToday: t("keyDateToday"),
+          keyDateInDays: t("keyDateInDays", { n: "{n}" }),
           more: t("more", { n: "{n}" }),
         });
         if (!message) {
