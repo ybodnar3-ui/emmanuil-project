@@ -3,10 +3,11 @@ import type { FeedItem } from "@/server/today/feed";
 import { FeedItemCard } from "./feed-item-card";
 
 /**
- * Renders the assembled feed grouped by type (contacts → birthdays → tasks),
- * each section labelled via next-intl. Server component: it only lays out and
- * labels; the per-item actions live in the client <FeedItemCard>. Within each
- * group the items keep the urgency order assembleTodayFeed produced.
+ * Renders the assembled feed grouped by type (people to reconnect with →
+ * birthdays → follow-ups), each section labelled via next-intl. Server
+ * component: it only lays out and labels; the per-item actions live in the
+ * client <FeedItemCard>. Within each group the items keep the urgency order
+ * assembleTodayFeed produced.
  */
 export async function TodayFeed({ items }: { items: FeedItem[] }) {
   const t = await getTranslations("today");
@@ -18,13 +19,13 @@ export async function TodayFeed({ items }: { items: FeedItem[] }) {
   return (
     <div className="space-y-7">
       {contacts.length > 0 ? (
-        <FeedSection title={t("section.contacts")} items={contacts} />
+        <FeedSection title={t("section.reconnect")} items={contacts} />
       ) : null}
       {birthdays.length > 0 ? (
         <FeedSection title={t("section.birthdays")} items={birthdays} />
       ) : null}
       {tasks.length > 0 ? (
-        <FeedSection title={t("section.tasks")} items={tasks} />
+        <FeedSection title={t("section.followUps")} items={tasks} />
       ) : null}
     </div>
   );

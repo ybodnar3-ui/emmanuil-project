@@ -10,12 +10,13 @@
     "settings": "Settings"
   },
   "today": {
-    "title": "Today",
-    "empty": "Nothing for today yet.",
+    "title": "People to reconnect with",
+    "subtitle": "Reach out to the people who matter, with something personal to say.",
+    "empty": "No one to reach out to today. Enjoy the calm.",
     "section": {
-      "contacts": "People to reach out to",
-      "birthdays": "Upcoming birthdays",
-      "tasks": "Tasks"
+      "reconnect": "People to reconnect with",
+      "birthdays": "Birthdays",
+      "followUps": "Follow-ups"
     },
     "overdue": "{days, plural, one {# day overdue} other {# days overdue}}",
     "dueToday": "Due today",
@@ -26,25 +27,8 @@
     "snooze3d": "Snooze 3d",
     "snooze7d": "Snooze 7d",
     "viewPerson": "View",
-    "talkingPoint": {
-      "button": "What to say?",
-      "loading": "Thinking…",
-      "error": "Could not get a suggestion. Please try again."
-    },
     "errors": {
       "notFound": "That item is no longer available. Refresh to update your feed."
-    }
-  },
-  "tasks": {
-    "add": "Add task",
-    "titleLabel": "Task",
-    "dueLabel": "Due date",
-    "personLabel": "Person",
-    "noteLabel": "Note",
-    "none": "None",
-    "errors": {
-      "invalid": "Please check this field.",
-      "notFound": "That person is no longer available."
     }
   },
   "people": {

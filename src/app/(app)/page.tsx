@@ -2,15 +2,14 @@ import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/server/auth";
 import { getLocaleFromCookie } from "@/i18n/locale";
 import { getTodayFeed } from "@/server/data/today";
-import { listPeople } from "@/server/data/people";
 import { TodayFeed } from "./_components/today-feed";
-import { AddTaskForm } from "./_components/add-task-form";
 
 /**
- * The Today tab. Server component: resolves the user, computes the feed live
- * (no cache, no cron — see the phase plan), and renders the add-task form plus
- * the ordered feed. The people list is loaded once here so the task form's
- * optional person picker doesn't need its own round-trip.
+ * The home tab: "people to reconnect with". Server component — resolves the
+ * user, reads the locale (for the per-contact personalized prompt), computes
+ * the feed live, and renders the ordered, person-centric list. No add-task form
+ * and no generic tasks: reminders are created from a person's card and surface
+ * here under their person.
  */
 export default async function TodayPage() {
   const t = await getTranslations("today");
@@ -18,16 +17,14 @@ export default async function TodayPage() {
   const locale = await getLocaleFromCookie();
   const now = new Date();
 
-  const [items, people] = await Promise.all([
-    getTodayFeed(user.id, now, locale),
-    listPeople(user.id),
-  ]);
+  const items = await getTodayFeed(user.id, now, locale);
 
   return (
     <section className="space-y-7">
-      <h1 className="text-3xl font-semibold">{t("title")}</h1>
-
-      <AddTaskForm people={people.map((p) => ({ id: p.id, fullName: p.fullName }))} />
+      <div className="space-y-1">
+        <h1 className="text-3xl font-semibold">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+      </div>
 
       {items.length === 0 ? (
         <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center">

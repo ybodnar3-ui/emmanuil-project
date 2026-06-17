@@ -13,20 +13,22 @@ import {
   snoozeTaskAction,
   type ActionResult,
 } from "../today/actions";
-import { TalkingPoint } from "./talking-point";
 
 /**
  * One feed row with its action buttons. Uses useTransition so the buttons
  * disable while the server action runs; on success the action's revalidatePath
  * refreshes the feed (the done/snoozed item drops out on the next render), so
- * there is no local optimistic state to manage. Person-linked items also get an
- * on-demand "what to say" control.
+ * there is no local optimistic state to manage.
+ *
+ * A due contact shows its personalized "what to ask" baked in (item.prompt,
+ * generated once per cadence cycle) — no on-demand AI call on the home page.
+ * A reminder (task) shows under its person.
  */
 export function FeedItemCard({ item }: { item: FeedItem }) {
   const t = useTranslations("today");
   const [pending, startTransition] = useTransition();
   const [errored, setErrored] = useState(false);
-  const pid = personIdFor(item);
+  const pid = item.personId;
 
   // Actions return a stable error result (e.g. NOT_FOUND if the person/task was
   // deleted between render and click) instead of throwing; surface it inline.
@@ -51,6 +53,12 @@ export function FeedItemCard({ item }: { item: FeedItem }) {
             <p className="text-xs text-muted-foreground">{subtitleFor(item, t)}</p>
           </div>
         </div>
+
+        {item.type === "contact" ? (
+          <p className="rounded-xl border border-border bg-accent/40 px-3 py-2 text-sm leading-relaxed">
+            {item.prompt}
+          </p>
+        ) : null}
 
         <div className="flex flex-wrap items-center gap-1.5">
           {item.type === "contact" ? (
@@ -129,10 +137,6 @@ export function FeedItemCard({ item }: { item: FeedItem }) {
             {t("errors.notFound")}
           </p>
         ) : null}
-
-        {pid ? (
-          <TalkingPoint personId={pid} occasion={occasionFor(item, t)} />
-        ) : null}
       </CardContent>
     </Card>
   );
@@ -144,11 +148,6 @@ function titleFor(item: FeedItem): string {
   return item.type === "task" ? item.title : item.personName;
 }
 
-function personIdFor(item: FeedItem): string | null {
-  // contact/birthday always carry personId; task's is nullable.
-  return item.personId;
-}
-
 function subtitleFor(item: FeedItem, t: TFn): string {
   if (item.type === "birthday") {
     return item.inDays === 0
@@ -156,20 +155,6 @@ function subtitleFor(item: FeedItem, t: TFn): string {
       : t("birthdayInDays", { days: item.inDays });
   }
   // contact or task — both carry overdueDays
-  return item.overdueDays === 0
-    ? t("dueToday")
-    : t("overdue", { days: item.overdueDays });
-}
-
-/** Natural-language reason handed to the AI suggestion (in the user's locale). */
-function occasionFor(item: FeedItem, t: TFn): string {
-  if (item.type === "birthday") {
-    return item.inDays === 0
-      ? t("birthdayToday")
-      : t("birthdayInDays", { days: item.inDays });
-  }
-  if (item.type === "task") return item.title;
-  // contact: give the model the real reason (overdue/due-today), not the heading.
   return item.overdueDays === 0
     ? t("dueToday")
     : t("overdue", { days: item.overdueDays });

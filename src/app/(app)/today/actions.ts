@@ -1,53 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { requireUser } from "@/server/auth";
-import { getLocaleFromCookie } from "@/i18n/locale";
-import { getPerson } from "@/server/data/people";
 import { markContacted, snoozeCadence } from "@/server/data/cadenceActions";
-import {
-  createTask,
-  completeTask,
-  snoozeTask,
-} from "@/server/data/tasks";
-import { taskInputSchema } from "@/server/validation/task";
-import { suggestTalkingPoint, type SuggestResult } from "@/server/ai/suggest";
+import { completeTask, snoozeTask } from "@/server/data/tasks";
 import { logError } from "@/server/log";
 
 /**
- * Server actions for the Today feed. Each one calls requireUser() FIRST, then
- * passes user.id into a scoped data function — no action trusts a client-passed
- * userId. Mutations revalidate "/" (the feed) and, where a person is involved,
- * "/people/[id]". Action results are typed; AI/data failures degrade to a stable
- * code rather than throwing a 500 to the client.
+ * Server actions for the home feed items. Each one calls requireUser() FIRST,
+ * then passes user.id into a scoped data function — no action trusts a
+ * client-passed userId. Mutations revalidate "/" (the feed) and, where a person
+ * is involved, "/people/[id]". Action results are typed; data failures degrade
+ * to a stable code rather than throwing a 500 to the client.
+ *
+ * Reminder creation lives on the person card (people/actions.ts#createReminderAction);
+ * the personalized "what to ask" is now baked into each contact at feed-build
+ * time (server/data/reminders.ts), so there is no on-demand suggestion action here.
  */
 
 export type ActionResult =
   | { status: "ok" }
   | { status: "error"; message: string };
-
-export type CreateTaskState =
-  | { status: "idle" }
-  | { status: "ok" }
-  | { status: "error"; fieldErrors?: Record<string, string>; message?: string };
-
-/**
- * Map a ZodError into the flat fieldErrors shape the form renders inline. Values
- * are BARE, `tasks`-namespace-relative keys (e.g. "errors.invalid") so the form's
- * useTranslations("tasks") translator resolves them to "tasks.errors.invalid"
- * without double-prefixing. Mirrors the people action's contract.
- */
-function fieldErrorsFromZod(error: z.ZodError): Record<string, string> {
-  const out: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const key = issue.path[0];
-    if (typeof key === "string" && !(key in out)) {
-      out[key] = "errors.invalid";
-    }
-  }
-  return out;
-}
 
 export async function markContactedAction(
   personId: string,
@@ -111,47 +84,4 @@ export async function snoozeTaskAction(
   }
   revalidatePath("/");
   return { status: "ok" };
-}
-
-export async function createTaskAction(
-  _prev: CreateTaskState,
-  formData: FormData,
-): Promise<CreateTaskState> {
-  const user = await requireUser();
-  const parsed = taskInputSchema.safeParse({
-    title: formData.get("title") ?? "",
-    dueAt: formData.get("dueAt") || "",
-    personId: formData.get("personId") || null,
-    note: formData.get("note") || null,
-  });
-  if (!parsed.success) {
-    return { status: "error", fieldErrors: fieldErrorsFromZod(parsed.error) };
-  }
-  // createTask asserts ownership of personId (if set) before writing; it throws
-  // if the selected person was deleted between render and submit.
-  try {
-    await createTask(user.id, parsed.data);
-  } catch (err) {
-    logError("action.createTask", err, { userId: user.id });
-    return { status: "error", fieldErrors: { personId: "NOT_FOUND" } };
-  }
-  revalidatePath("/");
-  return { status: "ok" };
-}
-
-/**
- * On-demand AI suggestion. Auth + ownership enforced: requireUser() then
- * getPerson(user.id, …) — the suggestion is built only from a person the caller
- * owns. Never throws to the client; suggestTalkingPoint returns a stable error
- * code on failure, which the UI maps to a localized message.
- */
-export async function suggestTalkingPointAction(
-  personId: string,
-  occasion: string,
-): Promise<SuggestResult> {
-  const user = await requireUser();
-  const person = await getPerson(user.id, personId); // ownership-scoped
-  if (!person) return { status: "error", message: "NOT_FOUND" };
-  const locale = await getLocaleFromCookie();
-  return suggestTalkingPoint(person, occasion, locale);
 }
