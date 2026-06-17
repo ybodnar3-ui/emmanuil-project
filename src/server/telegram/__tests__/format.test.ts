@@ -32,6 +32,7 @@ const contact: FeedItem = {
   reason: "cadence",
   dueAt: new Date("2026-06-10T00:00:00.000Z"),
   overdueDays: 3,
+  prompt: "Ask how her new role is going.",
 };
 
 const birthday: FeedItem = {
@@ -83,15 +84,31 @@ describe("formatReminderMessage", () => {
     expect(out).toContain("Tasks");
   });
 
+  it("renders each contact's personalized prompt under their name", () => {
+    const out = formatReminderMessage([contact], EN) as string;
+    expect(out).toContain("Ada Lovelace");
+    expect(out).toContain("Ask how her new role is going.");
+  });
+
+  it("HTML-escapes the contact prompt so markup can't be injected", () => {
+    const evil: FeedItem = {
+      ...contact,
+      prompt: "Ask <b>about</b> & <script>alert(1)</script>",
+    };
+    const out = formatReminderMessage([evil], EN) as string;
+    expect(out).not.toContain("<script>");
+    expect(out).toContain("&lt;b&gt;about&lt;/b&gt;");
+    expect(out).toContain("&amp;");
+  });
+
   it("HTML-escapes user-provided names so markup can't be injected", () => {
     const evil: FeedItem = {
       ...contact,
-      personName: "<b>x</b> & <script>alert(1)</script>",
+      personName: "<i>x</i> & friends",
     };
     const out = formatReminderMessage([evil], EN) as string;
-    expect(out).not.toContain("<b>x</b>");
-    expect(out).not.toContain("<script>");
-    expect(out).toContain("&lt;b&gt;x&lt;/b&gt;");
+    expect(out).not.toContain("<i>x</i>");
+    expect(out).toContain("&lt;i&gt;x&lt;/i&gt;");
     expect(out).toContain("&amp;");
   });
 

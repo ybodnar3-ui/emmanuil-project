@@ -50,7 +50,13 @@ export function formatReminderMessage(
   if (contacts.length > 0) {
     lines.push("", `<b>${escapeHtml(labels.contacts)}</b>`);
     for (const c of contacts) {
-      lines.push(`• ${escapeHtml(c.personName)}`);
+      // Each due contact carries its personalized "what to ask" (baked in per
+      // cadence cycle). Escape BOTH the name and the prompt — both are derived
+      // from user-controlled data and the message is sent as parse_mode HTML.
+      lines.push(`• <b>${escapeHtml(c.personName)}</b>`);
+      if (c.type === "contact" && c.prompt) {
+        lines.push(`  ${escapeHtml(c.prompt)}`);
+      }
     }
   }
 
