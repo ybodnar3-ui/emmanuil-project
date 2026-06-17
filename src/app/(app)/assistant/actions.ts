@@ -115,7 +115,10 @@ export async function applyProposalAction(input: {
     revalidatePath(`/people/${input.personId}`);
     return { status: "ok" };
   } catch (err) {
-    logError("action.applyProposal", err, { userId: user.id });
+    logError("action.applyProposal", err, {
+      userId: user.id,
+      personId: input.personId,
+    });
     return { status: "error" };
   }
 }

@@ -54,7 +54,7 @@ function FeedSection({ title, items }: { title: string; items: FeedItem[] }) {
 
 function keyFor(item: FeedItem): string {
   if (item.type === "task") return `task-${item.taskId}`;
-  // A person can have multiple key dates, so disambiguate by label too.
-  if (item.type === "keydate") return `keydate-${item.personId}-${item.label}`;
+  // A person can have multiple key dates; the row id is the stable key.
+  if (item.type === "keydate") return `keydate-${item.id}`;
   return `${item.type}-${item.personId}`;
 }

@@ -102,8 +102,8 @@ export function ProposalCard({ proposal }: { proposal: Proposal }) {
 
       {proposal.keyDates.length > 0 ? (
         <ul className="list-disc space-y-0.5 pl-5">
-          {proposal.keyDates.map((k, i) => (
-            <li key={i}>
+          {proposal.keyDates.map((k) => (
+            <li key={`${k.label}-${k.date}`}>
               <span className="text-muted-foreground">
                 {tPeople("keyDates.title")}:
               </span>{" "}

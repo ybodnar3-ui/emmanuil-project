@@ -26,6 +26,7 @@ export type FeedItem =
     }
   | {
       type: "keydate";
+      id: string;
       personId: string;
       personName: string;
       label: string;
@@ -140,6 +141,7 @@ export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
       rank: k.inDays,
       item: {
         type: "keydate",
+        id: k.id,
         personId: k.personId,
         personName: k.personName,
         label: k.label,
