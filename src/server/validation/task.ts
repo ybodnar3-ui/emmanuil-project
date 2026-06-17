@@ -10,7 +10,14 @@ import { z } from "zod";
  */
 export const taskInputSchema = z.object({
   title: z.string().trim().min(1).max(300),
-  dueAt: z.coerce.date(),
+  // Reject absurd past dates (e.g. a 1970-style coercion result) while always
+  // allowing "today": the 24h slack means any time today passes regardless of
+  // the user's timezone. Maps to a `dueAt` field error keyed "past" (see below).
+  dueAt: z.coerce
+    .date()
+    .refine((d) => d.getTime() >= Date.now() - 24 * 60 * 60 * 1000, {
+      message: "past",
+    }),
   personId: z.string().trim().min(1),
   note: z
     .string()

@@ -66,6 +66,7 @@ export async function GET(request: Request): Promise<Response> {
           contacts: t("contacts"),
           birthdays: t("birthdays"),
           tasks: t("tasks"),
+          more: t("more", { n: "{n}" }),
         });
         if (!message) {
           skipped++;

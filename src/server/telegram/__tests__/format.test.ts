@@ -16,6 +16,7 @@ const EN: ReminderLabels = {
   contacts: "Reach out",
   birthdays: "Birthdays",
   tasks: "Tasks",
+  more: "+{n} more",
 };
 
 const UK: ReminderLabels = {
@@ -23,6 +24,7 @@ const UK: ReminderLabels = {
   contacts: "Зв'язатися",
   birthdays: "Дні народження",
   tasks: "Завдання",
+  more: "+ще {n}",
 };
 
 const contact: FeedItem = {
@@ -117,6 +119,31 @@ describe("formatReminderMessage", () => {
     const out = formatReminderMessage([evil], EN) as string;
     expect(out).not.toContain("<i>v2</i>");
     expect(out).toContain("ship &lt;i&gt;v2&lt;/i&gt;");
+  });
+
+  it("truncates a huge feed under the Telegram limit and appends the +N more line", () => {
+    // Build far more contacts than can fit, each with a long prompt, so the
+    // formatter must drop some to stay under the 4096-char hard limit.
+    const huge: FeedItem[] = Array.from({ length: 200 }, (_, i) => ({
+      type: "contact" as const,
+      personId: `p${i}`,
+      personName: `Person Number ${i}`,
+      reason: "cadence" as const,
+      dueAt: new Date("2026-06-10T00:00:00.000Z"),
+      overdueDays: 1,
+      prompt: "A".repeat(120),
+    }));
+    const out = formatReminderMessage(huge, EN) as string;
+    expect(out).not.toBeNull();
+    // Stays comfortably under Telegram's 4096-char hard limit.
+    expect(out.length).toBeLessThan(4096);
+    // Some items were dropped, so the localized "+N more" line is present with a count.
+    expect(out).toMatch(/\+\d+ more/);
+  });
+
+  it("does not append +N more when everything fits", () => {
+    const out = formatReminderMessage([contact, birthday, task], EN) as string;
+    expect(out).not.toMatch(/\+\d+ more/);
   });
 
   it("renders a task linked to a person with the escaped person name", () => {

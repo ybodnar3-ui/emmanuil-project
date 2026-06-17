@@ -87,7 +87,11 @@ describe("getTodayData scoping", () => {
     getOrCreateReminderPrompt.mockResolvedValue("Ask about her new role.");
     const data = await getTodayData("u1", now, "uk");
     expect(data.contacts[0].prompt).toBe("Ask about her new role.");
-    expect(getOrCreateReminderPrompt).toHaveBeenCalledWith("u1", "c1", "uk", now);
+    // Feed path is trusted: ownership is enforced by the scoped cadence query, so
+    // the per-contact prompt is fetched with { trusted: true } (no extra check).
+    expect(getOrCreateReminderPrompt).toHaveBeenCalledWith("u1", "c1", "uk", now, {
+      trusted: true,
+    });
   });
 });
 

@@ -216,6 +216,7 @@
     "contacts": "People to reach out to",
     "birthdays": "Upcoming birthdays",
     "tasks": "Tasks",
-    "nothing": "Nothing for today."
+    "nothing": "Nothing for today.",
+    "more": "+{n} more"
   }
 }

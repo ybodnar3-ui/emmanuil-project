@@ -17,8 +17,15 @@ import type { PersonForBrief } from "@/server/ai/brief";
  * suggestion it returns a deterministic warm localized fallback. Ownership IS
  * enforced (assertPersonOwned) and a not-owned person propagates that error,
  * so the function never generates or writes for someone the caller doesn't own.
+ *
+ * `trusted` opt-out: when the caller has ALREADY proven ownership (e.g. the Today
+ * feed loads cadences via a `person: { userId }`-scoped query), pass
+ * { trusted: true } to skip the redundant assertPersonOwned round-trip. Default
+ * is false so standalone callers stay ownership-safe.
  */
 
+// fallbackPrompt: hardcoded en/uk is acceptable for our two locales (no generic
+// per-locale lookup table needed yet); revisit if a third locale is added.
 export function fallbackPrompt(locale: string): string {
   return locale === "uk"
     ? "Час написати — дізнайтесь, як справи, і підтримайте зв'язок."
@@ -30,9 +37,14 @@ export async function getOrCreateReminderPrompt(
   personId: string,
   locale: string,
   now: Date,
+  options: { trusted?: boolean } = {},
 ): Promise<string> {
   // Ownership first: never generate/cache for a person the caller doesn't own.
-  await assertPersonOwned(userId, personId);
+  // A trusted caller (ownership already enforced upstream by a scoped query) may
+  // skip this extra DB round-trip; the default-safe path still checks.
+  if (!options.trusted) {
+    await assertPersonOwned(userId, personId);
+  }
 
   const cadence = await prisma.cadence.findUnique({ where: { personId } });
   // No cadence means nothing to anchor the cycle on — give the warm fallback
@@ -84,6 +96,11 @@ export async function getOrCreateReminderPrompt(
     }
   }
 
+  // Cache-write race (accepted for MVP): a concurrent home-render and the cron
+  // may both find the prompt stale and regenerate, so this update is last-write-
+  // wins. That's idempotent enough — both produce an equivalent prompt for the
+  // same cycle. Future hardening: write a 'generating' sentinel to claim the
+  // cycle before the AI call so only one writer proceeds. No locking needed now.
   await prisma.cadence.update({
     where: { personId },
     data: { reminderPrompt: text, reminderPromptAt: now },

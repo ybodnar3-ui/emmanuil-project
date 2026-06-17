@@ -150,6 +150,22 @@ describe("getOrCreateReminderPrompt", () => {
     expect(cadenceUpdate).not.toHaveBeenCalled();
   });
 
+  it("skips the assertPersonOwned round-trip when called with { trusted: true }", async () => {
+    cadenceFindUnique.mockResolvedValue({
+      personId: "p1",
+      reminderPrompt: "Cached prompt",
+      reminderPromptAt: new Date("2026-06-16T00:00:00.000Z"),
+      lastContactedAt: new Date("2026-06-10T00:00:00.000Z"),
+    });
+    const out = await getOrCreateReminderPrompt("u1", "p1", "en", now, {
+      trusted: true,
+    });
+    expect(out).toBe("Cached prompt");
+    // Ownership is enforced upstream by the scoped feed query, so we must not
+    // re-check it here.
+    expect(assertPersonOwned).not.toHaveBeenCalled();
+  });
+
   it("does NOT generate or write for a person the caller does not own", async () => {
     assertPersonOwned.mockRejectedValue(new Error("Person not found"));
     await expect(getOrCreateReminderPrompt("u1", "p-other", "en", now)).rejects.toThrow();

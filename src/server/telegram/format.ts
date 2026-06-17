@@ -10,7 +10,18 @@ export type ReminderLabels = {
   contacts: string;
   birthdays: string;
   tasks: string;
+  /** "+N more" line appended when items are dropped to stay under the length cap.
+   *  Caller passes a localized template with an `{n}` placeholder (resolved here). */
+  more: string;
 };
+
+/**
+ * Telegram rejects messages over 4096 chars (the send silently fails). Cap the
+ * built message well under that so HTML entities / multi-byte names never push us
+ * over: we stop adding items once the running length would exceed this budget and
+ * append a localized "+N more" line for the remainder.
+ */
+const MAX_MESSAGE_CHARS = 3900;
 
 /**
  * Escape the five HTML-significant characters. The message is sent with
@@ -47,23 +58,40 @@ export function formatReminderMessage(
 
   const lines: string[] = [`<b>${escapeHtml(labels.header)}</b>`];
 
+  // Running budget: track length as we go and stop adding items (across all
+  // sections) once the next item would push the message over MAX_MESSAGE_CHARS.
+  // `dropped` counts the feed items we never rendered so we can append "+N more".
+  // joinedLength accounts for the "\n" join between lines.
+  let dropped = 0;
+  const joinedLength = (ls: string[]) =>
+    ls.reduce((n, l) => n + l.length, 0) + Math.max(0, ls.length - 1);
+
+  /** Try to add `block` (the lines for one item). Returns false if it wouldn't fit. */
+  const tryAdd = (block: string[]): boolean => {
+    const next = [...lines, ...block];
+    if (joinedLength(next) > MAX_MESSAGE_CHARS) return false;
+    lines.push(...block);
+    return true;
+  };
+
   if (contacts.length > 0) {
     lines.push("", `<b>${escapeHtml(labels.contacts)}</b>`);
     for (const c of contacts) {
       // Each due contact carries its personalized "what to ask" (baked in per
       // cadence cycle). Escape BOTH the name and the prompt — both are derived
       // from user-controlled data and the message is sent as parse_mode HTML.
-      lines.push(`• <b>${escapeHtml(c.personName)}</b>`);
+      const block = [`• <b>${escapeHtml(c.personName)}</b>`];
       if (c.type === "contact" && c.prompt) {
-        lines.push(`  ${escapeHtml(c.prompt)}`);
+        block.push(`  ${escapeHtml(c.prompt)}`);
       }
+      if (!tryAdd(block)) dropped++;
     }
   }
 
   if (birthdays.length > 0) {
     lines.push("", `<b>${escapeHtml(labels.birthdays)}</b>`);
     for (const b of birthdays) {
-      lines.push(`• ${escapeHtml(b.personName)}`);
+      if (!tryAdd([`• ${escapeHtml(b.personName)}`])) dropped++;
     }
   }
 
@@ -71,8 +99,16 @@ export function formatReminderMessage(
     lines.push("", `<b>${escapeHtml(labels.tasks)}</b>`);
     for (const t of tasks) {
       const who = t.personName ? ` — ${escapeHtml(t.personName)}` : "";
-      lines.push(`• ${escapeHtml(t.title)}${who}`);
+      if (!tryAdd([`• ${escapeHtml(t.title)}${who}`])) dropped++;
     }
+  }
+
+  if (dropped > 0) {
+    // The caller supplies a localized template with an `{n}` placeholder. The
+    // text is trusted (from our own message catalog), but escape it anyway for
+    // consistency, then substitute the (numeric, safe) count.
+    const moreLine = escapeHtml(labels.more).replace("{n}", String(dropped));
+    lines.push("", moreLine);
   }
 
   return lines.join("\n");
