@@ -20,6 +20,7 @@ const addFact = vi.fn();
 const logInteraction = vi.fn();
 const setCadence = vi.fn();
 const clearCadence = vi.fn();
+const createTask = vi.fn();
 const logError = vi.fn();
 
 class RedirectError extends Error {}
@@ -60,6 +61,9 @@ vi.mock("@/server/data/cadence", () => ({
   setCadence: (...a: unknown[]) => setCadence(...a),
   clearCadence: (...a: unknown[]) => clearCadence(...a),
 }));
+vi.mock("@/server/data/tasks", () => ({
+  createTask: (...a: unknown[]) => createTask(...a),
+}));
 vi.mock("@/server/ai/brief", () => ({ generateBrief: vi.fn() }));
 vi.mock("@/server/storage", () => ({
   ensureAvatarsBucket: vi.fn(),
@@ -72,6 +76,7 @@ import {
   setCadenceAction,
   deletePersonAction,
   clearCadenceAction,
+  createReminderAction,
 } from "../actions";
 import { fieldErrorsFromZod } from "../field-errors";
 import { z } from "zod";
@@ -92,6 +97,7 @@ beforeEach(() => {
     logInteraction,
     setCadence,
     clearCadence,
+    createTask,
     logError,
     redirect,
   ]) {
@@ -207,6 +213,53 @@ describe("deletePersonAction (idempotent)", () => {
       { userId: "u1", personId: "p1" },
     );
     expect(redirect).toHaveBeenCalledWith("/people");
+  });
+});
+
+describe("createReminderAction", () => {
+  it("creates a reminder anchored to the bound person on the happy path", async () => {
+    createTask.mockResolvedValue({ id: "t1" });
+    const result = await createReminderAction(
+      "p1",
+      { status: "idle" },
+      form({ title: "Send the article", dueAt: "2026-06-25" }),
+    );
+    expect(result).toEqual({ status: "ok" });
+    expect(createTask).toHaveBeenCalledOnce();
+    const [userId, input] = createTask.mock.calls[0];
+    expect(userId).toBe("u1");
+    expect(input.personId).toBe("p1");
+    expect(input.title).toBe("Send the article");
+  });
+
+  it("returns bare reminder field-error keys on invalid input without touching the data layer", async () => {
+    const result = await createReminderAction(
+      "p1",
+      { status: "idle" },
+      form({ title: "", dueAt: "" }),
+    );
+    expect(result.status).toBe("error");
+    if (result.status !== "error") return;
+    expect(result.fieldErrors?.title).toBe("reminder.errors.invalid");
+    expect(createTask).not.toHaveBeenCalled();
+  });
+
+  it("returns notFound and logs when createTask throws (person deleted / not owned)", async () => {
+    createTask.mockRejectedValue(new Error("Person not found"));
+    const result = await createReminderAction(
+      "p1",
+      { status: "idle" },
+      form({ title: "Call them", dueAt: "2026-06-25" }),
+    );
+    expect(result).toEqual({
+      status: "error",
+      message: "people.reminder.errors.notFound",
+    });
+    expect(logError).toHaveBeenCalledWith(
+      "action.createReminder",
+      expect.any(Error),
+      { userId: "u1", personId: "p1" },
+    );
   });
 });
 

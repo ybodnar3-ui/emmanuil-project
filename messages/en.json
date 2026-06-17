@@ -1,6 +1,14 @@
 {
-  "app": { "description": "Your relationship portfolio + AI assistant" },
-  "nav": { "ariaLabel": "Main", "today": "Today", "people": "People", "assistant": "Assistant", "settings": "Settings" },
+  "app": {
+    "description": "Your relationship portfolio + AI assistant"
+  },
+  "nav": {
+    "ariaLabel": "Main",
+    "today": "Today",
+    "people": "People",
+    "assistant": "Assistant",
+    "settings": "Settings"
+  },
   "today": {
     "title": "Today",
     "empty": "Nothing for today yet.",
@@ -23,7 +31,9 @@
       "loading": "Thinking…",
       "error": "Could not get a suggestion. Please try again."
     },
-    "errors": { "notFound": "That item is no longer available. Refresh to update your feed." }
+    "errors": {
+      "notFound": "That item is no longer available. Refresh to update your feed."
+    }
   },
   "tasks": {
     "add": "Add task",
@@ -123,6 +133,17 @@
       "clear": "Clear",
       "interval": "Remind me every (days)"
     },
+    "reminder": {
+      "title": "Set a reminder",
+      "label": "What to remember",
+      "placeholder": "e.g. Send the article we talked about",
+      "dateLabel": "When",
+      "add": "Add reminder",
+      "errors": {
+        "invalid": "Please check this field.",
+        "notFound": "That person is no longer available. Refresh and try again."
+      }
+    },
     "errors": {
       "invalid": "Please check this field.",
       "photo": "Photo upload failed, but the rest was saved.",
@@ -150,7 +171,9 @@
       "applied": "Saved.",
       "viewPerson": "View person"
     },
-    "clarify": { "createPerson": "Add a new person" },
+    "clarify": {
+      "createPerson": "Add a new person"
+    },
     "voice": {
       "start": "Start recording",
       "stop": "Stop recording",

@@ -16,12 +16,14 @@ import { getLocaleFromCookie } from "@/i18n/locale";
 import { addFact, deleteFact } from "@/server/data/facts";
 import { logInteraction } from "@/server/data/interactions";
 import { setCadence, clearCadence } from "@/server/data/cadence";
+import { createTask } from "@/server/data/tasks";
 import {
   personInputSchema,
   factInputSchema,
   interactionInputSchema,
   cadenceInputSchema,
 } from "@/server/validation/person";
+import { taskInputSchema } from "@/server/validation/task";
 import { ensureAvatarsBucket, uploadAvatar } from "@/server/storage";
 import { logError } from "@/server/log";
 
@@ -249,6 +251,50 @@ export async function generateBriefAction(
   if (!person) return { status: "error", message: "NOT_FOUND" };
   const locale = await getLocaleFromCookie();
   return generateBrief(person, locale);
+}
+
+/**
+ * Create a one-off reminder anchored to THIS person. Reminders are always
+ * person-tied now (no generic add-task), so personId comes bound from the card,
+ * never picked client-side. requireUser() → zod-validate (taskInputSchema, which
+ * requires personId) → createTask (asserts ownership of the person before the
+ * write). Field errors are returned as bare `reminder`-relative keys for the
+ * form's useTranslations("people") translator (people.reminder.errors.*).
+ */
+export async function createReminderAction(
+  personId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const user = await requireUser();
+  const parsed = taskInputSchema.safeParse({
+    title: formData.get("title") ?? "",
+    dueAt: formData.get("dueAt") || "",
+    personId,
+    note: formData.get("note") || null,
+  });
+  if (!parsed.success) {
+    // Map zod issues to the reminder form's namespace-relative keys. personId is
+    // bound (not user-editable), so a personId issue still surfaces generically.
+    const fieldErrors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0];
+      if (typeof key === "string" && !(key in fieldErrors)) {
+        fieldErrors[key] = "reminder.errors.invalid";
+      }
+    }
+    return { status: "error", fieldErrors };
+  }
+  try {
+    await createTask(user.id, parsed.data);
+  } catch (err) {
+    logError("action.createReminder", err, { userId: user.id, personId });
+    return { status: "error", message: "people.reminder.errors.notFound" };
+  }
+  // The reminder shows on the home feed (its person is due as a follow-up).
+  revalidatePath("/");
+  revalidatePath(`/people/${personId}`);
+  return { status: "ok" };
 }
 
 export async function clearCadenceAction(formData: FormData): Promise<void> {

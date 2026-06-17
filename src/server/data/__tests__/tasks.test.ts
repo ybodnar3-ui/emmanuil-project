@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
  * Ownership + scoping contract for the Task data layer (mocked @/server/db):
- *  - createTask injects userId and gates on assertPersonOwned ONLY when a
- *    personId is present
+ *  - createTask injects userId and ALWAYS gates on assertPersonOwned (reminders
+ *    are person-anchored; personId is required)
  *  - completeTask / snoozeTask scope mutations by { id, userId } so another
  *    user's task can't be touched
  *  - listOpenTasksDue filters by userId + status + dueAt
@@ -42,21 +42,7 @@ beforeEach(() => {
 });
 
 describe("createTask", () => {
-  it("injects the caller userId and does NOT assert person ownership when personId is absent", async () => {
-    taskCreate.mockResolvedValue({ id: "t1" });
-    await createTask("u1", {
-      title: "Buy groceries",
-      dueAt: new Date("2026-06-12T00:00:00.000Z"),
-      personId: null,
-      note: null,
-    });
-    expect(personFindFirst).not.toHaveBeenCalled();
-    const arg = taskCreate.mock.calls[0][0];
-    expect(arg.data.userId).toBe("u1");
-    expect(arg.data.personId).toBeNull();
-  });
-
-  it("asserts person ownership BEFORE creating when personId is present", async () => {
+  it("asserts person ownership BEFORE creating (personId is required)", async () => {
     personFindFirst.mockResolvedValue({ id: "p1", userId: "u1" });
     taskCreate.mockResolvedValue({ id: "t1" });
     await createTask("u1", {

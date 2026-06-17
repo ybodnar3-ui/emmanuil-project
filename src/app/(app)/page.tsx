@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/server/auth";
+import { getLocaleFromCookie } from "@/i18n/locale";
 import { getTodayFeed } from "@/server/data/today";
 import { listPeople } from "@/server/data/people";
 import { TodayFeed } from "./_components/today-feed";
@@ -14,10 +15,11 @@ import { AddTaskForm } from "./_components/add-task-form";
 export default async function TodayPage() {
   const t = await getTranslations("today");
   const user = await requireUser();
+  const locale = await getLocaleFromCookie();
   const now = new Date();
 
   const [items, people] = await Promise.all([
-    getTodayFeed(user.id, now),
+    getTodayFeed(user.id, now, locale),
     listPeople(user.id),
   ]);
 

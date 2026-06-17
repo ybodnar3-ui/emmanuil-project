@@ -6,26 +6,24 @@ import { endOfUtcDay, addUtcDays } from "@/server/today/dates";
 /**
  * Scoped data-access for Task. Like every owned-row module, each query/mutation
  * is scoped to the authenticated userId; mutations scope by `{ id, userId }` in
- * the `where` so one user can never touch another user's task. A task may be
- * attached to a Person — when it is, ownership of that Person is asserted before
- * the write (a task can't reference someone else's person).
+ * the `where` so one user can never touch another user's task. Reminders are
+ * always anchored to a Person, so ownership of that Person is asserted before
+ * the write (a reminder can't reference someone else's person).
  */
 
 /**
- * Create a task for the user. If `personId` is set, ownership of that person is
- * asserted first (throws "Person not found" otherwise). `userId` is always
- * forced from the caller — never taken from input.
+ * Create a reminder for the user. `personId` is REQUIRED — ownership of that
+ * person is asserted first (throws "Person not found" otherwise). `userId` is
+ * always forced from the caller — never taken from input.
  */
 export async function createTask(userId: string, input: TaskInput) {
-  if (input.personId) {
-    await assertPersonOwned(userId, input.personId);
-  }
+  await assertPersonOwned(userId, input.personId);
   return prisma.task.create({
     data: {
       userId,
       title: input.title,
       dueAt: input.dueAt,
-      personId: input.personId ?? null,
+      personId: input.personId,
       note: input.note ?? null,
     },
   });

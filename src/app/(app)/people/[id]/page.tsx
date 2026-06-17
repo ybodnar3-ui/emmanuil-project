@@ -14,6 +14,7 @@ import { FactForm } from "./_components/fact-form";
 import { DeleteFactButton } from "./_components/delete-fact-button";
 import { InteractionForm } from "./_components/interaction-form";
 import { CadenceForm } from "./_components/cadence-form";
+import { ReminderForm } from "./_components/reminder-form";
 import { DeletePersonButton } from "./_components/delete-person-button";
 import { BriefPanel } from "./_components/brief-panel";
 
@@ -133,6 +134,14 @@ export default async function PersonCardPage({
             personId={person.id}
             currentIntervalDays={person.cadence?.intervalDays}
           />
+
+          {/* One-off reminder, always anchored to this person. */}
+          <div className="space-y-2 border-t border-border pt-4">
+            <h3 className="text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+              {t("reminder.title")}
+            </h3>
+            <ReminderForm personId={person.id} />
+          </div>
         </CardContent>
       </Card>
 

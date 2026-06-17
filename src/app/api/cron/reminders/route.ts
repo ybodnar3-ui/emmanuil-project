@@ -58,8 +58,8 @@ export async function GET(request: Request): Promise<Response> {
         continue;
       }
       try {
-        const feed = await getTodayFeed(user.id, now);
         const locale = normalizeLocale(user.locale);
+        const feed = await getTodayFeed(user.id, now, locale);
         const t = await getTranslations({ locale, namespace: "reminder" });
         const message = formatReminderMessage(feed, {
           header: t("header"),
