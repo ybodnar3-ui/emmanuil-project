@@ -191,6 +191,18 @@
     "title": "Settings",
     "language": "Language",
     "signOut": "Sign out",
+    "push": {
+      "title": "Push notifications",
+      "enabled": "Notifications are on for this device. You'll get your daily reminder here.",
+      "disabled": "Turn on notifications to get a daily reminder of who to reach out to.",
+      "enable": "Turn on notifications",
+      "disable": "Turn off",
+      "unsupported": "This browser doesn't support notifications.",
+      "iosHint": "On iPhone: tap Share, then \"Add to Home Screen\", open Emmanuil from the icon, and turn notifications on there.",
+      "notConfigured": "Notifications aren't set up on this server yet.",
+      "denied": "Notifications are blocked. Enable them in your browser settings, then try again.",
+      "error": "Couldn't change notifications. Please try again."
+    },
     "telegram": {
       "title": "Telegram reminders",
       "connected": "Telegram is connected. You'll get your daily reminders there.",

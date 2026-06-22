@@ -3,6 +3,7 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { buttonVariants } from "@/components/ui/button";
 import { requireUser } from "@/server/auth";
 import { ConnectTelegram } from "./_components/connect-telegram";
+import { PushNotifications } from "./_components/push-notifications";
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
@@ -26,6 +27,15 @@ export default async function SettingsPage() {
           {t("telegram.title")}
         </p>
         <ConnectTelegram connected={telegramConnected} />
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
+        <p className="mb-3 text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+          {t("push.title")}
+        </p>
+        <PushNotifications
+          vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""}
+        />
       </div>
 
       <form action="/auth/signout" method="post">
