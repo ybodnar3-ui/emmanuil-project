@@ -197,6 +197,8 @@ describe("applyProposal ownership + persistence", () => {
     ).rejects.toThrow();
     expect(transaction).not.toHaveBeenCalled();
     expect(keyDateCreate).not.toHaveBeenCalled();
+    // Ownership runs exactly once, before the empty-guard fires.
+    expect(personFindFirst).toHaveBeenCalledOnce();
   });
 
   it("rejects an empty proposal before opening a transaction", async () => {

@@ -2,9 +2,9 @@ import { startOfUtcDay, daysUntilBirthday, MS_PER_DAY } from "./dates";
 import type { UpcomingKeyDate } from "@/server/data/keydates";
 
 /**
- * One actionable row in the Today feed. The three sources (cadence-due contacts,
- * upcoming birthdays, due tasks) are normalized into this discriminated union so
- * the UI renders them uniformly.
+ * One actionable row in the Today feed. The four sources (cadence-due contacts,
+ * upcoming birthdays, upcoming key dates, due tasks) are normalized into this
+ * discriminated union so the UI renders them uniformly.
  */
 export type FeedItem =
   | {
@@ -84,8 +84,10 @@ function overdueDays(dueAt: Date, now: Date): number {
  *
  * Result: most-overdue contacts/tasks, then today's items (due contacts/tasks
  * at rank 0 ahead of today's birthdays/key dates via the type tie-break), then
- * upcoming birthdays + key dates interleaved in ascending day order (a birthday
- * sorts before a key date at the same day via the stable label tie-break).
+ * upcoming birthdays + key dates interleaved in ascending day order. Contacts/
+ * tasks sort before birthdays/key dates via typeWeight; a birthday and a key
+ * date at the same inDays fall back to a lexical tie-break (personName, then
+ * label for key dates) so ordering is stable.
  */
 export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
   const items: { item: FeedItem; rank: number }[] = [];
@@ -157,7 +159,11 @@ export function assembleTodayFeed(sources: FeedSources, now: Date): FeedItem[] {
   const typeWeight = (i: FeedItem) =>
     i.type === "birthday" || i.type === "keydate" ? 1 : 0;
   const label = (i: FeedItem) =>
-    i.type === "task" ? i.title : i.personName;
+    i.type === "task"
+      ? i.title
+      : i.type === "keydate"
+        ? `${i.personName} ${i.label}`
+        : i.personName;
 
   items.sort((a, b) => {
     if (a.rank !== b.rank) return a.rank - b.rank;

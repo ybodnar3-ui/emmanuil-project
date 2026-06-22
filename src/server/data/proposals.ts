@@ -6,6 +6,7 @@ import {
   interactionInputSchema,
 } from "@/server/validation/person";
 import { keyDateInputSchema } from "@/server/validation/keydate";
+import { logError } from "@/server/log";
 
 /**
  * The assistant's confirm-before-persist write path. The conversational layer
@@ -37,8 +38,7 @@ export type ProposalInput = {
  * the Phase 3 zod schemas (never trust the client-sent shape), then create the
  * facts, any valid key dates, and (if present) the interaction in a single
  * transaction. Invalid proposed key dates are skipped (re-validated, not trusted).
- * When an
- * interaction is logged we reuse the cadence-bump logic from `logInteraction`
+ * When an interaction is logged we reuse the cadence-bump logic from `logInteraction`
  * (lastContactedAt := date, nextDueAt := computeNextDueAt) rather than
  * duplicating the cadence math. Rejects an empty proposal.
  */
@@ -65,7 +65,11 @@ export async function applyProposal(
   // confirmed proposal. Never trust the client-sent shape.
   const keyDates = (input.keyDates ?? []).flatMap((k) => {
     const parsed = keyDateInputSchema.safeParse({ label: k.label, date: k.date });
-    return parsed.success ? [parsed.data] : [];
+    if (parsed.success) return [parsed.data];
+    // Log only the offending date string (not the label, which is user/AI-authored
+    // content) so a systematic AI date-format regression is visible in prod logs.
+    logError("proposals.invalidKeyDate", parsed.error, { date: k.date });
+    return [];
   });
 
   if (facts.length === 0 && interaction == null && keyDates.length === 0) {

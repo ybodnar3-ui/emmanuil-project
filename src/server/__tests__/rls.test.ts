@@ -21,6 +21,7 @@ const hasEnv = Boolean(url && anonKey && process.env.DATABASE_URL);
 const TEST_USER_ID = "rls-test-user";
 const TEST_USER_EMAIL = "rls-test@example.invalid";
 const TEST_PERSON_ID = "rls-test-person";
+const TEST_KEYDATE_ID = "rls-test-keydate";
 
 describe.skipIf(!hasEnv)("RLS deny-by-default (anon path)", () => {
   afterAll(async () => {
@@ -57,6 +58,50 @@ describe.skipIf(!hasEnv)("RLS deny-by-default (anon path)", () => {
       .from("Person")
       .select("*")
       .eq("id", TEST_PERSON_ID);
+
+    // RLS with no policies denies the anon role. Acceptable outcomes:
+    //  - an error (permission denied / table not exposed), or
+    //  - a successful call returning no rows (the row is invisible, never leaked).
+    if (error) {
+      expect(error).toBeTruthy();
+    } else {
+      expect(data ?? []).toHaveLength(0);
+    }
+  });
+
+  it("hides a Prisma-seeded KeyDate row from the anon Supabase client", async () => {
+    // Seed via the privileged Prisma path (bypasses RLS). FK chain: User → Person → KeyDate.
+    await prisma.user.deleteMany({ where: { id: TEST_USER_ID } });
+    await prisma.user.create({
+      data: { id: TEST_USER_ID, email: TEST_USER_EMAIL },
+    });
+    await prisma.person.create({
+      data: { id: TEST_PERSON_ID, userId: TEST_USER_ID, fullName: "RLS Probe" },
+    });
+    await prisma.keyDate.create({
+      data: {
+        id: TEST_KEYDATE_ID,
+        personId: TEST_PERSON_ID,
+        label: "RLS Probe Date",
+        date: new Date("2000-01-01T00:00:00.000Z"),
+      },
+    });
+
+    // Positive control: the row really exists and is visible to the privileged path.
+    const seeded = await prisma.keyDate.findUnique({
+      where: { id: TEST_KEYDATE_ID },
+    });
+    expect(seeded?.id).toBe(TEST_KEYDATE_ID);
+
+    // The real proof: the anon client must NOT see the row that definitely exists.
+    // (See the Person probe above for why we inject a dummy realtime transport.)
+    const supabase = createClient(url!, anonKey!, {
+      realtime: { transport: class {} as never },
+    });
+    const { data, error } = await supabase
+      .from("KeyDate")
+      .select("*")
+      .eq("id", TEST_KEYDATE_ID);
 
     // RLS with no policies denies the anon role. Acceptable outcomes:
     //  - an error (permission denied / table not exposed), or

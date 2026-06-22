@@ -223,7 +223,9 @@ export async function deleteKeyDateAction(formData: FormData): Promise<void> {
     try {
       await deleteKeyDate(user.id, keyDateId);
     } catch (err) {
-      // Idempotent: a stale/already-deleted id (or not-owned) is a no-op success.
+      // Not idempotent at the data layer (deleteKeyDate throws on a missing/
+      // not-owned id); the action treats both as non-fatal — it logs and still
+      // revalidates, so a stale id is a no-op from the user's perspective.
       logError("action.deleteKeyDate", err, { userId: user.id, keyDateId });
     }
   }

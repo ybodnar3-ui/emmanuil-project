@@ -35,6 +35,7 @@ const UK: ReminderLabels = {
 
 const keyDate: FeedItem = {
   type: "keydate",
+  id: "k-test",
   personId: "p3",
   personName: "Maria",
   label: "son's birthday",

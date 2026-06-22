@@ -33,11 +33,13 @@ export const interpretationSchema = z.object({
     .default(null),
   // Labeled dates extracted from the message (family birthdays, anniversaries).
   // `date` is an ISO date string; if the year is unknown the model uses the current
-  // year (recurrence ignores the year). Invalid dates are dropped on apply, not here.
+  // year (the stored year is kept for context but ignored at query time — recurrence
+  // is by month/day). Invalid dates are dropped on apply, not here. An empty label is
+  // rejected here (min(1)) so it can't show an empty bullet and then vanish on confirm.
   proposedKeyDates: z
     .array(
       z.object({
-        label: z.string(),
+        label: z.string().min(1),
         date: z.string(),
       }),
     )

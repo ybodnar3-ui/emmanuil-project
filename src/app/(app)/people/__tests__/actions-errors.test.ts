@@ -82,6 +82,7 @@ import {
   addKeyDateAction,
   setCadenceAction,
   deletePersonAction,
+  deleteKeyDateAction,
   clearCadenceAction,
   createReminderAction,
 } from "../actions";
@@ -216,6 +217,7 @@ describe("addKeyDateAction", () => {
     expect(result.status).toBe("error");
     if (result.status !== "error") return;
     expect(result.fieldErrors?.label).toBe("errors.invalid");
+    expect(result.fieldErrors?.date).toBe("errors.invalid");
     expect(addKeyDate).not.toHaveBeenCalled();
   });
 
@@ -313,6 +315,20 @@ describe("createReminderAction", () => {
       "action.createReminder",
       expect.any(Error),
       { userId: "u1", personId: "p1" },
+    );
+  });
+});
+
+describe("deleteKeyDateAction (non-fatal at the data layer)", () => {
+  it("logs but does not throw when deleteKeyDate rejects (stale/not-owned id)", async () => {
+    deleteKeyDate.mockRejectedValue(new Error("not found"));
+    await expect(
+      deleteKeyDateAction(form({ keyDateId: "k1", personId: "p1" })),
+    ).resolves.toBeUndefined();
+    expect(logError).toHaveBeenCalledWith(
+      "action.deleteKeyDate",
+      expect.any(Error),
+      { userId: "u1", keyDateId: "k1" },
     );
   });
 });

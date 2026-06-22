@@ -161,6 +161,26 @@ describe("getUpcomingKeyDates", () => {
     });
   });
 
+  it("wraps across the year boundary (Dec 30 is in 3 days from Dec 27)", async () => {
+    const dec27 = new Date("2026-12-27T10:00:00.000Z");
+    keyDateFindMany.mockResolvedValue([
+      {
+        id: "k-newyear",
+        personId: "p1",
+        label: "anniversary",
+        date: new Date("2010-12-30T00:00:00.000Z"), // next occurrence Dec 30 → in 3 days
+        person: { fullName: "Maria" },
+      },
+    ]);
+    const upcoming = await getUpcomingKeyDates("u1", dec27, 7);
+    expect(upcoming.map((u) => u.id)).toEqual(["k-newyear"]);
+    expect(upcoming[0]).toMatchObject({
+      id: "k-newyear",
+      personName: "Maria",
+      inDays: 3,
+    });
+  });
+
   it("respects a custom window", async () => {
     keyDateFindMany.mockResolvedValue([
       {
