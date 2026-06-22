@@ -104,10 +104,21 @@ export function AssistantChat() {
         className="flex-1 space-y-3 overflow-y-auto rounded-2xl border border-border bg-card/60 p-4"
       >
         {entries.length === 0 ? (
-          <div className="flex h-full min-h-40 flex-col items-center justify-center gap-1 text-center">
+          <div className="flex h-full min-h-40 flex-col items-center justify-center gap-3 text-center">
             <p className="font-heading text-lg text-foreground">
               {t("placeholder")}
             </p>
+            <div className="space-y-2 text-sm text-muted-foreground">
+              <p>
+                {t("examples.captureLabel")}{" "}
+                <span className="text-foreground">“{t("examples.capture")}”</span>
+              </p>
+              <p>
+                {t("examples.queryLabel")}{" "}
+                <span className="text-foreground">“{t("examples.query")}”</span>
+              </p>
+              <p className="text-xs">{t("examples.voiceHint")}</p>
+            </div>
           </div>
         ) : null}
 

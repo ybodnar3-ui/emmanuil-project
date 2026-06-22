@@ -160,6 +160,13 @@
     "inputPlaceholder": "Ask about someone, or add a fact…",
     "send": "Send",
     "thinking": "Thinking…",
+    "examples": {
+      "captureLabel": "Try capturing a fact:",
+      "capture": "Maria's son Andrii just started at LSE",
+      "queryLabel": "Or ask about someone:",
+      "query": "What do I know about Maria?",
+      "voiceHint": "Type, or tap the mic to dictate."
+    },
     "errors": {
       "EMPTY_INPUT": "Type a message first.",
       "REQUEST_FAILED": "Something went wrong reaching the assistant. Please try again.",
