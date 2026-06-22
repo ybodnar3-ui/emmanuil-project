@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { requireUser } from "@/server/auth";
 import { getLocaleFromCookie } from "@/i18n/locale";
 import { getTodayFeed } from "@/server/data/today";
+import { countPeople } from "@/server/data/people";
+import { EmptyState } from "./_components/empty-state";
 import { TodayFeed } from "./_components/today-feed";
 
 /**
@@ -18,6 +20,10 @@ export default async function TodayPage() {
   const now = new Date();
 
   const items = await getTodayFeed(user.id, now, locale);
+  // Distinguish a brand-new user (no people yet) from a returning user with a
+  // quiet day, so the empty state can guide the former and reassure the latter.
+  // Short-circuit so we never run the extra count when the feed is non-empty.
+  const hasPeople = items.length > 0 ? true : (await countPeople(user.id)) > 0;
 
   return (
     <section className="space-y-7">
@@ -27,9 +33,15 @@ export default async function TodayPage() {
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center">
-          <p className="font-heading text-xl text-foreground">{t("empty")}</p>
-        </div>
+        hasPeople ? (
+          <EmptyState title={t("empty")} />
+        ) : (
+          <EmptyState
+            title={t("emptyNewTitle")}
+            description={t("emptyNewHint")}
+            action={{ href: "/people/new", label: t("emptyNewCta") }}
+          />
+        )
       ) : (
         <TodayFeed items={items} />
       )}

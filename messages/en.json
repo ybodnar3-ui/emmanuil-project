@@ -13,6 +13,9 @@
     "title": "People to reconnect with",
     "subtitle": "Reach out to the people who matter, with something personal to say.",
     "empty": "No one to reach out to today. Enjoy the calm.",
+    "emptyNewTitle": "Add your first person",
+    "emptyNewHint": "Once you add someone, Emmanuil tells you here who to reconnect with and what to ask.",
+    "emptyNewCta": "Add a person",
     "section": {
       "reconnect": "People to reconnect with",
       "birthdays": "Birthdays",
@@ -38,6 +41,9 @@
   "people": {
     "title": "People",
     "empty": "No people yet.",
+    "emptyTitle": "Add your first person",
+    "emptyHint": "Save a contact and a few facts — Emmanuil reminds you when to reach out and what to ask.",
+    "emptyAssistant": "…or just tell the assistant — type or speak",
     "add": "Add person",
     "searchPlaceholder": "Search by name…",
     "filterTier": "Relationship",

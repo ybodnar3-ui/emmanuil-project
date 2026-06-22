@@ -5,6 +5,7 @@ import { requireUser } from "@/server/auth";
 import { searchPeople } from "@/server/data/people";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "../_components/empty-state";
 import { PeopleSearch } from "./_components/people-search";
 import { PersonAvatar } from "./_components/person-avatar";
 import { TierBadge } from "./_components/tier-badge";
@@ -36,9 +37,12 @@ export default async function PeoplePage({
       <PeopleSearch />
 
       {people.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-card px-6 py-12 text-center">
-          <p className="font-heading text-xl text-foreground">{t("empty")}</p>
-        </div>
+        <EmptyState
+          title={t("emptyTitle")}
+          description={t("emptyHint")}
+          action={{ href: "/people/new", label: t("add") }}
+          secondary={{ href: "/assistant", label: t("emptyAssistant") }}
+        />
       ) : (
         <ul className="ql-stagger divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
           {people.map((person) => (
