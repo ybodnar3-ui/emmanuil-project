@@ -34,6 +34,12 @@ export function listPeople(userId: string) {
   });
 }
 
+/** Number of people the user has — for the Today onboarding branch (new user vs
+ *  returning user with nothing due today). Scoped to the caller. */
+export function countPeople(userId: string): Promise<number> {
+  return prisma.person.count({ where: { userId } });
+}
+
 /**
  * Loads a Person only if it belongs to userId. Throws otherwise. The single gate
  * every nested-entity mutation funnels through before touching Fact/Interaction/Cadence.
