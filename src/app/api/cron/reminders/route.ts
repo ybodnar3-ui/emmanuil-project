@@ -1,35 +1,32 @@
 import { getTranslations } from "next-intl/server";
-import { listLinkedUsers } from "@/server/data/telegram";
-import { getTodayFeed } from "@/server/data/today";
 import {
-  telegramConfigured,
-  sendTelegramMessage,
-} from "@/server/telegram/client";
-import { formatReminderMessage } from "@/server/telegram/format";
+  listPushTargets,
+  deleteSubscriptionByEndpoint,
+} from "@/server/data/push";
+import { getTodayFeed } from "@/server/data/today";
+import { pushConfigured, sendPush } from "@/server/push/send";
+import { formatPushPayload } from "@/server/push/format";
 import { normalizeLocale } from "@/i18n/locale";
 import { logError } from "@/server/log";
+
+// web-push uses Node crypto — pin the Node.js runtime (not Edge).
+export const runtime = "nodejs";
 
 /**
  * Daily reminder cron. Vercel hits this on a schedule (see vercel.json) with
  * `Authorization: Bearer <CRON_SECRET>`.
  *
- * Security + robustness:
- *  - Verifies the bearer matches CRON_SECRET (401 otherwise) — the only guard
- *    on this otherwise-public route.
- *  - No bot token → 200 { skipped } no-op.
- *  - Per-user isolation: each linked user's OWN Today feed (getTodayFeed(user.id))
- *    and OWN locale. Empty feed → skip (formatter returns null). A failure for
- *    one user is logged and does NOT abort the others.
- *  - Never throws to the caller; returns { sent, skipped, failed } counts.
+ *  - Verifies the bearer matches CRON_SECRET (401 otherwise).
+ *  - No VAPID keys → 200 { skipped: "no vapid" } no-op.
+ *  - Per-user isolation: each target's OWN Today feed + OWN locale. Sends the
+ *    personalized payload to every device subscription; a "gone" endpoint is
+ *    pruned. A failure for one target is logged and never aborts the rest.
+ *  - Never throws to the caller; returns { sent, skipped, failed, pruned }.
  */
-
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization");
   if (!secret) {
-    // Distinct from a wrong/missing header: surface WHY reminders silently
-    // stop in prod. Security behavior is unchanged (still 401); the secret and
-    // the incoming header value are never logged.
     logError(
       "cron.reminders",
       new Error("CRON_SECRET is not set — cron will reject all requests"),
@@ -40,61 +37,55 @@ export async function GET(request: Request): Promise<Response> {
     return new Response("unauthorized", { status: 401 });
   }
 
-  if (!telegramConfigured()) {
-    return Response.json({ skipped: "no token" });
+  if (!pushConfigured()) {
+    return Response.json({ skipped: "no vapid" });
   }
 
   let sent = 0;
   let skipped = 0;
   let failed = 0;
+  let pruned = 0;
 
   try {
-    const users = await listLinkedUsers();
+    const targets = await listPushTargets();
     const now = new Date();
 
-    for (const user of users) {
-      if (!user.telegramChatId) {
-        skipped++;
-        continue;
-      }
+    for (const target of targets) {
       try {
-        const locale = normalizeLocale(user.locale);
-        const feed = await getTodayFeed(user.id, now, locale);
+        const locale = normalizeLocale(target.locale);
+        const feed = await getTodayFeed(target.userId, now, locale);
         const t = await getTranslations({ locale, namespace: "reminder" });
-        const message = formatReminderMessage(feed, {
+        const payload = formatPushPayload(feed, {
           header: t("header"),
           contacts: t("contacts"),
           birthdays: t("birthdays"),
           tasks: t("tasks"),
-          // Pass templates with literal placeholders; format.ts fills them per item
-          // (kept plural-free there, like `more`).
-          keyDate: t("keyDate", {
-            name: "{name}",
-            label: "{label}",
-            when: "{when}",
-          }),
+          keyDate: t("keyDate", { name: "{name}", label: "{label}", when: "{when}" }),
           keyDateToday: t("keyDateToday"),
           keyDateInDays: t("keyDateInDays", { n: "{n}" }),
-          more: t("more", { n: "{n}" }),
         });
-        if (!message) {
+        if (!payload) {
           skipped++;
           continue;
         }
-        const ok = await sendTelegramMessage(user.telegramChatId, message);
-        if (ok) sent++;
-        else failed++;
+        for (const subscription of target.subscriptions) {
+          const result = await sendPush(subscription, payload);
+          if (result === "ok") sent++;
+          else if (result === "gone") {
+            pruned++;
+            await deleteSubscriptionByEndpoint(subscription.endpoint);
+          } else {
+            failed++;
+          }
+        }
       } catch (err) {
-        // Per-user failure: log (no secrets) and continue with the rest.
         failed++;
-        logError("cron.reminders.user", err, { userId: user.id });
+        logError("cron.reminders.user", err, { userId: target.userId });
       }
     }
   } catch (err) {
-    // Top-level failure (e.g. the user query). Log and return 200 with counts;
-    // never throw to the cron caller.
     logError("cron.reminders", err);
   }
 
-  return Response.json({ sent, skipped, failed });
+  return Response.json({ sent, skipped, failed, pruned });
 }
