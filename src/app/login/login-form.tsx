@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ function GoogleIcon() {
  */
 export function LoginForm({ linkExpired = false }: { linkExpired?: boolean }) {
   const t = useTranslations("auth");
+  const tLegal = useTranslations("legal");
   const [state, formAction, pending] = useActionState(
     sendMagicLink,
     initialState,
@@ -133,6 +135,15 @@ export function LoginForm({ linkExpired = false }: { linkExpired?: boolean }) {
         </form>
       )}
       </div>
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        <Link href="/legal/privacy" className="underline-offset-4 hover:underline">
+          {tLegal("privacy")}
+        </Link>
+        {" · "}
+        <Link href="/legal/terms" className="underline-offset-4 hover:underline">
+          {tLegal("terms")}
+        </Link>
+      </p>
     </section>
   );
 }
