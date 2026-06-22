@@ -33,14 +33,23 @@ export function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (!vapidPublicKey) return setView({ kind: "unsupported" });
-    if (!pushSupported()) {
-      setView(isIosNotStandalone() ? { kind: "ios-hint" } : { kind: "unsupported" });
-      return;
+    // Resolve the initial per-device state asynchronously so the effect never
+    // calls setState synchronously in its body (react-hooks/set-state-in-effect).
+    let cancelled = false;
+    async function resolveView(): Promise<View> {
+      if (!vapidPublicKey) return { kind: "unsupported" };
+      if (!pushSupported()) {
+        return isIosNotStandalone() ? { kind: "ios-hint" } : { kind: "unsupported" };
+      }
+      const sub = await currentSubscription();
+      return sub ? { kind: "subscribed" } : { kind: "not-subscribed" };
     }
-    currentSubscription().then((sub) =>
-      setView(sub ? { kind: "subscribed" } : { kind: "not-subscribed" }),
-    );
+    resolveView().then((next) => {
+      if (!cancelled) setView(next);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [vapidPublicKey]);
 
   function enable() {

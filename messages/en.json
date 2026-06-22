@@ -202,17 +202,6 @@
       "notConfigured": "Notifications aren't set up on this server yet.",
       "denied": "Notifications are blocked. Enable them in your browser settings, then try again.",
       "error": "Couldn't change notifications. Please try again."
-    },
-    "telegram": {
-      "title": "Telegram reminders",
-      "connected": "Telegram is connected. You'll get your daily reminders there.",
-      "notConnected": "Connect Telegram to get a daily reminder of who to reach out to.",
-      "connect": "Connect Telegram",
-      "disconnect": "Disconnect",
-      "instructions": "Open the link below and tap Start to finish connecting.",
-      "openBot": "Open Telegram",
-      "notConfigured": "Telegram isn't set up on this server yet. Please try again later.",
-      "error": "Couldn't connect Telegram. Please try again."
     }
   },
   "auth": {

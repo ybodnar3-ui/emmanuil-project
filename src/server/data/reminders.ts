@@ -5,7 +5,7 @@ import type { PersonForBrief } from "@/server/ai/brief";
 
 /**
  * Per-cadence-cycle personalized reminder prompt: the "what to ask" line baked
- * into each due contact on the home feed and in the Telegram reminder.
+ * into each due contact on the home feed and in the daily push reminder.
  *
  * Generated once per cycle and cached on the Cadence row (reminderPrompt /
  * reminderPromptAt). A cache hit costs nothing (no AI call); regeneration only

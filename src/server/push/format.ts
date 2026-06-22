@@ -5,7 +5,7 @@ import type { PushPayload } from "./send";
  * Localized labels for the push body. Resolved by the caller from next-intl
  * (the cron picks them per the user's locale) and passed in, so this module
  * stays pure: no next-intl import, no I/O, no Date.now. Reuses the `reminder.*`
- * message keys (the same content the Telegram channel used).
+ * message keys (the daily reminder content).
  */
 export type PushLabels = {
   header: string;
