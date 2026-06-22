@@ -89,7 +89,7 @@
     },
     "facts": {
       "title": "Facts",
-      "empty": "No facts yet.",
+      "empty": "Add what you know — family, work, what to ask about.",
       "add": "Add fact",
       "content": "Fact",
       "category": "Category",
@@ -112,7 +112,7 @@
     },
     "interactions": {
       "title": "Interactions",
-      "empty": "No interactions logged yet.",
+      "empty": "Log a call or meeting to start the timeline.",
       "log": "Log interaction",
       "summary": "What happened",
       "date": "Date",
