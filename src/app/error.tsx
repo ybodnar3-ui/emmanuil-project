@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { reportClientError } from "@/lib/client-error";
 
 /**
  * Root-segment error boundary (e.g. /login, /auth/*). It also renders inside the
@@ -22,6 +23,7 @@ export default function RootError({
 
   useEffect(() => {
     console.error(error);
+    reportClientError(error, "boundary");
   }, [error]);
 
   return (

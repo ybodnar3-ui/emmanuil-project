@@ -3,6 +3,7 @@ import { Manrope, Playfair_Display } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
+import { ClientErrorReporter } from "./_components/client-error-reporter";
 
 // Quiet Luxury type system. Both families ship Cyrillic so Ukrainian renders
 // in the editorial serif as well as the sans body. Exposed as CSS vars so the
@@ -61,6 +62,7 @@ export default async function RootLayout({
     <html lang={locale} className={`${manrope.variable} ${playfair.variable}`}>
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider messages={messages}>
+          <ClientErrorReporter />
           {children}
         </NextIntlClientProvider>
       </body>

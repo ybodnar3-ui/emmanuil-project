@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { reportClientError } from "@/lib/client-error";
 
 /**
  * Error boundary for the protected (app) route group. It renders INSIDE the root
@@ -23,6 +24,7 @@ export default function AppError({
 
   useEffect(() => {
     console.error(error);
+    reportClientError(error, "boundary");
   }, [error]);
 
   return (
