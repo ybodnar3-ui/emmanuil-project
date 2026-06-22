@@ -218,6 +218,14 @@
       "error": "Couldn't change notifications. Please try again."
     }
   },
+  "legal": {
+    "title": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "back": "← Back",
+    "effective": "Effective {date}",
+    "draftNotice": "This is a plain-language draft describing how the app handles data. It is not legal advice; have a professional review it before any commercial launch."
+  },
   "auth": {
     "signIn": "Sign in",
     "signInHint": "We'll email you a magic link to sign in. No password needed.",
