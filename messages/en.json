@@ -44,6 +44,7 @@
     "emptyTitle": "Add your first person",
     "emptyHint": "Save a contact and a few facts — Emmanuil reminds you when to reach out and what to ask.",
     "emptyAssistant": "…or just tell the assistant — type or speak",
+    "noResults": "No matches. Try a different search or filter.",
     "add": "Add person",
     "searchPlaceholder": "Search by name…",
     "filterTier": "Relationship",

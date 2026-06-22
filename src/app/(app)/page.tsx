@@ -23,7 +23,7 @@ export default async function TodayPage() {
   // Distinguish a brand-new user (no people yet) from a returning user with a
   // quiet day, so the empty state can guide the former and reassure the latter.
   // Short-circuit so we never run the extra count when the feed is non-empty.
-  const hasPeople = items.length > 0 ? true : (await countPeople(user.id)) > 0;
+  const hasPeople = items.length > 0 || (await countPeople(user.id)) > 0;
 
   return (
     <section className="space-y-7">

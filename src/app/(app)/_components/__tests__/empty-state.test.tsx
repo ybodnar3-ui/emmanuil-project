@@ -38,6 +38,8 @@ describe("EmptyState", () => {
   it("omits CTA + secondary when not provided", () => {
     render(<EmptyState title="t" description="d" />);
     expect(screen.queryByRole("link")).toBeNull();
+    // The CTA renders as role="button" (Button-as-Link), so assert it's absent too.
+    expect(screen.queryByRole("button")).toBeNull();
     expect(screen.getByText("d")).toBeInTheDocument();
   });
 });

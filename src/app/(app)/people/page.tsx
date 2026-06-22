@@ -19,6 +19,10 @@ export default async function PeoplePage({
   const { q, tag, tier } = await searchParams;
   const user = await requireUser();
   const people = await searchPeople(user.id, { query: q, tag, tier });
+  // With no active filter, an empty list means the user truly has no people
+  // (onboarding). With a filter, an empty list just means "no matches" — don't
+  // show the new-user CTA to someone who already has contacts.
+  const filtering = Boolean(q || tag || tier);
 
   return (
     <section className="space-y-5">
@@ -37,12 +41,16 @@ export default async function PeoplePage({
       <PeopleSearch />
 
       {people.length === 0 ? (
-        <EmptyState
-          title={t("emptyTitle")}
-          description={t("emptyHint")}
-          action={{ href: "/people/new", label: t("add") }}
-          secondary={{ href: "/assistant", label: t("emptyAssistant") }}
-        />
+        filtering ? (
+          <EmptyState title={t("noResults")} />
+        ) : (
+          <EmptyState
+            title={t("emptyTitle")}
+            description={t("emptyHint")}
+            action={{ href: "/people/new", label: t("add") }}
+            secondary={{ href: "/assistant", label: t("emptyAssistant") }}
+          />
+        )
       ) : (
         <ul className="ql-stagger divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-[0_1px_2px_rgba(31,29,24,0.04),0_8px_24px_rgba(31,29,24,0.04)] dark:shadow-none">
           {people.map((person) => (
