@@ -57,4 +57,12 @@ touch icons, `display: standalone`, theme-color, and safe-area insets for notche
 A service worker / offline caching / web-push are the next step (deferred post-MVP); the
 manifest and layout are structured so they can be added without rework.
 
+## Monitoring
+
+Errors are observed via Vercel logs (no third-party service). Server errors are written by
+`logError` as structured `console.error` lines. Browser errors (React render crashes, uncaught
+errors, unhandled rejections) are POSTed to `/api/client-error`, which logs them the same way.
+View them in the Vercel dashboard → the project → **Logs** / **Observability** (filter on
+`"scope":"client"`, `"window"`, `"unhandledrejection"`, or `"global-error"`).
+
 See `docs/superpowers/specs` for the design and `docs/superpowers/plans` for the roadmap.
