@@ -9,9 +9,6 @@ import type { PushPayload } from "./send";
  */
 export type PushLabels = {
   header: string;
-  contacts: string;
-  birthdays: string;
-  tasks: string;
   /** Greeting template with `{name}` / `{label}` / `{when}` placeholders. */
   keyDate: string;
   /** `{when}` when the key date is today. */

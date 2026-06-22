@@ -4,9 +4,6 @@ import { formatPushPayload, type PushLabels } from "../format";
 
 const labels: PushLabels = {
   header: "Your day with people",
-  contacts: "People to reach out to",
-  birthdays: "Birthdays & dates",
-  tasks: "Tasks",
   keyDate: "Wish {name} — {label} ({when})",
   keyDateToday: "today",
   keyDateInDays: "in {n} days",

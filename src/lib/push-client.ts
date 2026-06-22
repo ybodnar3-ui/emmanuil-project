@@ -41,8 +41,8 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 export async function subscribeToPush(
   vapidPublicKey: string,
 ): Promise<PushSubscriptionJSON | null> {
-  const reg = await navigator.serviceWorker.register("/sw.js");
-  await navigator.serviceWorker.ready;
+  await navigator.serviceWorker.register("/sw.js");
+  const reg = await navigator.serviceWorker.ready;
   const permission = await Notification.requestPermission();
   if (permission !== "granted") return null;
   const sub = await reg.pushManager.subscribe({

@@ -16,6 +16,7 @@ import { subscribePushAction, unsubscribePushAction } from "../actions";
 type View =
   | { kind: "loading" }
   | { kind: "unsupported" }
+  | { kind: "not-configured" }
   | { kind: "ios-hint" }
   | { kind: "subscribed" }
   | { kind: "not-subscribed" }
@@ -37,7 +38,7 @@ export function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }
     // calls setState synchronously in its body (react-hooks/set-state-in-effect).
     let cancelled = false;
     async function resolveView(): Promise<View> {
-      if (!vapidPublicKey) return { kind: "unsupported" };
+      if (!vapidPublicKey) return { kind: "not-configured" };
       if (!pushSupported()) {
         return isIosNotStandalone() ? { kind: "ios-hint" } : { kind: "unsupported" };
       }
@@ -80,6 +81,8 @@ export function PushNotifications({ vapidPublicKey }: { vapidPublicKey: string }
   if (view.kind === "loading") return null;
   if (view.kind === "unsupported")
     return <p className="text-sm text-muted-foreground">{t("unsupported")}</p>;
+  if (view.kind === "not-configured")
+    return <p className="text-sm text-muted-foreground">{t("notConfigured")}</p>;
   if (view.kind === "ios-hint")
     return <p className="text-sm text-muted-foreground">{t("iosHint")}</p>;
 

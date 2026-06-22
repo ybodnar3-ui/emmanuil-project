@@ -6,7 +6,8 @@ import { logError } from "@/server/log";
  * false and callers skip entirely. No-throw/no-leak: sendPush maps a dead
  * endpoint (404/410) to "gone" so the caller prunes it, any other failure to
  * "error" (logged server-side, never thrown), success to "ok". The VAPID private
- * key is never logged.
+ * key is never logged. VAPID details are applied on every send (a cheap
+ * synchronous in-memory assignment) so key rotation and test isolation work.
  */
 
 export type PushPayload = { title: string; body: string; url: string };
@@ -23,22 +24,19 @@ export function pushConfigured(): boolean {
   );
 }
 
-let vapidSet = false;
-function ensureVapid(): void {
-  if (vapidSet) return;
+function setVapid(): void {
   webpush.setVapidDetails(
     process.env.VAPID_SUBJECT!,
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
     process.env.VAPID_PRIVATE_KEY!,
   );
-  vapidSet = true;
 }
 
 export async function sendPush(
   subscription: Subscription,
   payload: PushPayload,
 ): Promise<"ok" | "gone" | "error"> {
-  ensureVapid();
+  setVapid();
   try {
     await webpush.sendNotification(
       {

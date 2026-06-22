@@ -22,6 +22,10 @@ export const runtime = "nodejs";
  *    personalized payload to every device subscription; a "gone" endpoint is
  *    pruned. A failure for one target is logged and never aborts the rest.
  *  - Never throws to the caller; returns { sent, skipped, failed, pruned }.
+ *
+ * `failed` is a mixed per-send/per-target counter: it counts each per-subscription
+ * send error plus one per target whose feed/translation step throws — keep that in
+ * mind when wiring alerting off this value.
  */
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
@@ -57,9 +61,6 @@ export async function GET(request: Request): Promise<Response> {
         const t = await getTranslations({ locale, namespace: "reminder" });
         const payload = formatPushPayload(feed, {
           header: t("header"),
-          contacts: t("contacts"),
-          birthdays: t("birthdays"),
-          tasks: t("tasks"),
           keyDate: t("keyDate", { name: "{name}", label: "{label}", when: "{when}" }),
           keyDateToday: t("keyDateToday"),
           keyDateInDays: t("keyDateInDays", { n: "{n}" }),
